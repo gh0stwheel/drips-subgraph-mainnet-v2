@@ -1,0 +1,75 @@
+specVersion: 0.0.2
+schema:
+  file: schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: RadicleRegistry
+    network: mainnet
+    source:
+      address: "0x40e9340BE9326b2e026fDBEfe775F1515939bD46"
+      abi: RadicleRegistry
+      startBlock: 8774325
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - FundingProject
+      abis:
+        - name: RadicleRegistry
+          file: RadicleRegistry/abis/RadicleRegistry.json
+        - name: DripsToken
+          file: RadicleRegistry/abis/DripsToken.json
+      eventHandlers:
+        - event: NewProject(address,indexed address,indexed address,string)
+          handler: handleNewProject
+      file: RadicleRegistry/RadicleRegistry.wasm
+  - kind: ethereum/contract
+    name: DaiDripsHub
+    network: mainnet
+    source:
+      address: "0x73043143e0a6418cc45d82d4505b096b802fd365"
+      abi: DaiDripsHub
+      startBlock: 8774325
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - DaiDripsHub
+      abis:
+        - name: DaiDripsHub
+          file: DaiDripsHub/abis/DaiDripsHub.json
+      eventHandlers:
+        - event: Collected(indexed address,uint128,uint128)
+          handler: handleCollected
+      file: RadicleRegistry/RadicleRegistry.wasm
+templates:
+  - kind: ethereum/contract
+    name: DripsToken
+    network: mainnet
+    source:
+      abi: DripsToken
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: templates/DripsToken/DripsToken.wasm
+      entities:
+        - FundingProject
+        - TokenType
+        - Token
+      abis:
+        - name: DripsToken
+          file: DripsToken/abis/DripsToken.json
+      eventHandlers:
+        - event: NewType(indexed uint128,uint64,uint128,bool,string)
+          handler: handleNewType
+        - event: NewStreamingToken(indexed uint256,indexed address,indexed uint128,uint128,uint128)
+          handler: handleNewStreamingToken
+        - event: NewToken(indexed uint256,indexed address,indexed uint128,uint128)
+          handler: handleNewToken
+        - event: Transfer(indexed address,indexed address,indexed uint256)
+          handler: handleTransfer
+        - event: NewContractURI(string)
+          handler: handleNewContractURI

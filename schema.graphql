@@ -1,0 +1,34 @@
+type FundingProject @entity {
+  id: ID! # the NFT Registry Address (ERC-721 address)
+  projectName: String
+  projectOwner: Bytes! # address
+  dripsTokenTemplate: Bytes! # addess of ERC-721 contract used
+  blockTimestampCreated: BigInt!
+  daiCollected: BigInt!
+  daiSplit: BigInt!
+  tokenTypes: [TokenType!]! @derivedFrom(field: "fundingProject")
+  tokens: [Token!]! @derivedFrom(field: "fundingProject")
+  ipfsHash: String
+}
+
+type TokenType @entity {
+  id: ID! # the ERC-721 address + "-" + the tokenID
+  tokenRegistryAddress: Bytes!
+  tokenTypeId: BigInt!
+  streaming: Boolean!
+  limit: BigInt!
+  minAmtPerSec: BigInt!
+  fundingProject: FundingProject!
+  ipfsHash: String
+}
+
+type Token @entity {
+  id: ID! # the tokenId
+  tokenId: BigInt!
+  tokenRegistryAddress: Bytes!
+  tokenType: TokenType!
+  tokenReceiver: Bytes! # address
+  rank: BigInt!
+  amtPerSec: BigInt!
+  fundingProject: FundingProject!
+}
