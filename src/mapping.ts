@@ -4,9 +4,10 @@ import {
   NewProject,
 } from "../generated/RadicleRegistry/RadicleRegistry"
 import {
-  Collected
+  Collected, Dripping
 } from "../generated/DaiDripsHub/DaiDripsHub"
 import { FundingProject } from "../generated/schema"
+import { Drip } from "../generated/schema"
 import { DripsToken } from '../generated/templates';
 
 export function handleNewProject(event: NewProject): void {
@@ -36,6 +37,23 @@ export function handleCollected(event: Collected): void {
 
   entity.daiCollected = entity.daiCollected.plus(event.params.collected)
   entity.daiSplit = entity.daiSplit.plus(event.params.split)
+
+  entity.save()
+}
+
+export function handleDrippingUpdate(event: Dripping): void {
+
+  let dripId = event.params.user.toHex() + "-" + event.params.receiver.toHex()
+  let entity = Drip.load(dripId)
+
+  if (!entity) {
+    entity = new Drip(dripId)
+  }
+
+  entity.user = event.params.user
+  entity.receiver = event.params.receiver
+  entity.amtPerSec = event.params.amtPerSec
+  entity.endTime = event.params.endTime
 
   entity.save()
 }

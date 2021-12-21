@@ -362,3 +362,77 @@ export class Token extends Entity {
     this.set("fundingProject", Value.fromString(value));
   }
 }
+
+export class Drip extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+
+    this.set("user", Value.fromBytes(Bytes.empty()));
+    this.set("receiver", Value.fromBytes(Bytes.empty()));
+    this.set("amtPerSec", Value.fromBigInt(BigInt.zero()));
+    this.set("endTime", Value.fromBigInt(BigInt.zero()));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id != null, "Cannot save Drip entity without an ID");
+    if (id) {
+      assert(
+        id.kind == ValueKind.STRING,
+        "Cannot save Drip entity with non-string ID. " +
+          'Considering using .toHex() to convert the "id" to a string.'
+      );
+      store.set("Drip", id.toString(), this);
+    }
+  }
+
+  static load(id: string): Drip | null {
+    return changetype<Drip | null>(store.get("Drip", id));
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value!.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get user(): Bytes {
+    let value = this.get("user");
+    return value!.toBytes();
+  }
+
+  set user(value: Bytes) {
+    this.set("user", Value.fromBytes(value));
+  }
+
+  get receiver(): Bytes {
+    let value = this.get("receiver");
+    return value!.toBytes();
+  }
+
+  set receiver(value: Bytes) {
+    this.set("receiver", Value.fromBytes(value));
+  }
+
+  get amtPerSec(): BigInt {
+    let value = this.get("amtPerSec");
+    return value!.toBigInt();
+  }
+
+  set amtPerSec(value: BigInt) {
+    this.set("amtPerSec", Value.fromBigInt(value));
+  }
+
+  get endTime(): BigInt {
+    let value = this.get("endTime");
+    return value!.toBigInt();
+  }
+
+  set endTime(value: BigInt) {
+    this.set("endTime", Value.fromBigInt(value));
+  }
+}

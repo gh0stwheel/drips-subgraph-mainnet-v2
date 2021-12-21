@@ -32,3 +32,11 @@ type Token @entity {
   amtPerSec: BigInt!
   fundingProject: FundingProject!
 }
+
+type Drip @entity {
+  id: ID! # 
+  user: Bytes! # address
+  receiver: Bytes! # address
+  amtPerSec: BigInt!
+  endTime: BigInt!
+}
