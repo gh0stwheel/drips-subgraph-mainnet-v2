@@ -1,6 +1,7 @@
 import { DripsToken, NewType, NewStreamingToken, NewToken, Transfer, NewContractURI} from "../generated/RadicleRegistry/DripsToken";
 import { FundingProject, TokenType, Token } from "../generated/schema";
 import { Address, store, crypto } from "@graphprotocol/graph-ts";
+import { BigInt } from "@graphprotocol/graph-ts"
 import { concat } from "@graphprotocol/graph-ts/helper-functions";
 
 export function handleNewType(event: NewType): void {
@@ -13,8 +14,9 @@ export function handleNewType(event: NewType): void {
   entity.streaming = event.params.streaming
   entity.fundingProject = event.address.toHex()
   entity.ipfsHash = event.params.ipfsHash
+  entity.currentTotalAmtPerSec = new BigInt(0)
+  entity.currentTotalGiven = new BigInt(0)
 
-  // Entities can be written to the store with `.save()`
   entity.save()
 }
 
@@ -28,8 +30,15 @@ export function handleNewStreamingToken(event: NewStreamingToken): void {
   entity.amtPerSec = event.params.amtPerSec
   entity.fundingProject = event.address.toHex()
 
-  // Entities can be written to the store with `.save()`
   entity.save()
+
+  // Now we need to add the amtPerSec to the currentTotalAmtPerSec on the TokenType
+  let tokenType = TokenType.load(entity.tokenType)
+  if (!tokenType) {
+    return
+  }
+  tokenType.currentTotalAmtPerSec = tokenType.currentTotalAmtPerSec.plus(entity.amtPerSec)
+  tokenType.save()
 }
 
 export function handleNewToken(event: NewToken): void {
@@ -39,10 +48,18 @@ export function handleNewToken(event: NewToken): void {
   entity.tokenRegistryAddress = event.address
   entity.tokenType = event.address.toHex() + "-" + event.params.typeId.toString()
   entity.tokenReceiver = event.params.receiver
+  entity.giveAmt = event.params.giveAmt
   entity.fundingProject = event.address.toHex()
 
-  // Entities can be written to the store with `.save()`
   entity.save()
+
+  // Now we need to add the amtPerSec to the currentTotalAmtPerSec on the TokenType
+  let tokenType = TokenType.load(entity.tokenType)
+  if (!tokenType) {
+    return
+  }
+  tokenType.currentTotalGiven = tokenType.currentTotalAmtPerSec.plus(entity.giveAmt)
+  tokenType.save()
 }
 
 export function handleTransfer(event: Transfer): void {

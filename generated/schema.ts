@@ -159,6 +159,8 @@ export class TokenType extends Entity {
     this.set("limit", Value.fromBigInt(BigInt.zero()));
     this.set("minAmtPerSec", Value.fromBigInt(BigInt.zero()));
     this.set("fundingProject", Value.fromString(""));
+    this.set("currentTotalAmtPerSec", Value.fromBigInt(BigInt.zero()));
+    this.set("currentTotalGiven", Value.fromBigInt(BigInt.zero()));
   }
 
   save(): void {
@@ -257,6 +259,24 @@ export class TokenType extends Entity {
       this.set("ipfsHash", Value.fromString(<string>value));
     }
   }
+
+  get currentTotalAmtPerSec(): BigInt {
+    let value = this.get("currentTotalAmtPerSec");
+    return value!.toBigInt();
+  }
+
+  set currentTotalAmtPerSec(value: BigInt) {
+    this.set("currentTotalAmtPerSec", Value.fromBigInt(value));
+  }
+
+  get currentTotalGiven(): BigInt {
+    let value = this.get("currentTotalGiven");
+    return value!.toBigInt();
+  }
+
+  set currentTotalGiven(value: BigInt) {
+    this.set("currentTotalGiven", Value.fromBigInt(value));
+  }
 }
 
 export class Token extends Entity {
@@ -270,6 +290,7 @@ export class Token extends Entity {
     this.set("tokenReceiver", Value.fromBytes(Bytes.empty()));
     this.set("rank", Value.fromBigInt(BigInt.zero()));
     this.set("amtPerSec", Value.fromBigInt(BigInt.zero()));
+    this.set("giveAmt", Value.fromBigInt(BigInt.zero()));
     this.set("fundingProject", Value.fromString(""));
   }
 
@@ -353,6 +374,15 @@ export class Token extends Entity {
     this.set("amtPerSec", Value.fromBigInt(value));
   }
 
+  get giveAmt(): BigInt {
+    let value = this.get("giveAmt");
+    return value!.toBigInt();
+  }
+
+  set giveAmt(value: BigInt) {
+    this.set("giveAmt", Value.fromBigInt(value));
+  }
+
   get fundingProject(): string {
     let value = this.get("fundingProject");
     return value!.toString();
@@ -363,12 +393,68 @@ export class Token extends Entity {
   }
 }
 
-export class Drip extends Entity {
+export class DripsConfig extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+
+    this.set("balance", Value.fromBigInt(BigInt.zero()));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id != null, "Cannot save DripsConfig entity without an ID");
+    if (id) {
+      assert(
+        id.kind == ValueKind.STRING,
+        "Cannot save DripsConfig entity with non-string ID. " +
+          'Considering using .toHex() to convert the "id" to a string.'
+      );
+      store.set("DripsConfig", id.toString(), this);
+    }
+  }
+
+  static load(id: string): DripsConfig | null {
+    return changetype<DripsConfig | null>(store.get("DripsConfig", id));
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value!.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get dripsEntries(): Array<string> {
+    let value = this.get("dripsEntries");
+    return value!.toStringArray();
+  }
+
+  set dripsEntries(value: Array<string>) {
+    this.set("dripsEntries", Value.fromStringArray(value));
+  }
+
+  get balance(): BigInt {
+    let value = this.get("balance");
+    return value!.toBigInt();
+  }
+
+  set balance(value: BigInt) {
+    this.set("balance", Value.fromBigInt(value));
+  }
+}
+
+export class DripsEntry extends Entity {
   constructor(id: string) {
     super();
     this.set("id", Value.fromString(id));
 
     this.set("user", Value.fromBytes(Bytes.empty()));
+    this.set("dripsConfig", Value.fromString(""));
+    this.set("isAccountDrip", Value.fromBoolean(false));
+    this.set("account", Value.fromBigInt(BigInt.zero()));
     this.set("receiver", Value.fromBytes(Bytes.empty()));
     this.set("amtPerSec", Value.fromBigInt(BigInt.zero()));
     this.set("endTime", Value.fromBigInt(BigInt.zero()));
@@ -376,19 +462,19 @@ export class Drip extends Entity {
 
   save(): void {
     let id = this.get("id");
-    assert(id != null, "Cannot save Drip entity without an ID");
+    assert(id != null, "Cannot save DripsEntry entity without an ID");
     if (id) {
       assert(
         id.kind == ValueKind.STRING,
-        "Cannot save Drip entity with non-string ID. " +
+        "Cannot save DripsEntry entity with non-string ID. " +
           'Considering using .toHex() to convert the "id" to a string.'
       );
-      store.set("Drip", id.toString(), this);
+      store.set("DripsEntry", id.toString(), this);
     }
   }
 
-  static load(id: string): Drip | null {
-    return changetype<Drip | null>(store.get("Drip", id));
+  static load(id: string): DripsEntry | null {
+    return changetype<DripsEntry | null>(store.get("DripsEntry", id));
   }
 
   get id(): string {
@@ -407,6 +493,33 @@ export class Drip extends Entity {
 
   set user(value: Bytes) {
     this.set("user", Value.fromBytes(value));
+  }
+
+  get dripsConfig(): string {
+    let value = this.get("dripsConfig");
+    return value!.toString();
+  }
+
+  set dripsConfig(value: string) {
+    this.set("dripsConfig", Value.fromString(value));
+  }
+
+  get isAccountDrip(): boolean {
+    let value = this.get("isAccountDrip");
+    return value!.toBoolean();
+  }
+
+  set isAccountDrip(value: boolean) {
+    this.set("isAccountDrip", Value.fromBoolean(value));
+  }
+
+  get account(): BigInt {
+    let value = this.get("account");
+    return value!.toBigInt();
+  }
+
+  set account(value: BigInt) {
+    this.set("account", Value.fromBigInt(value));
   }
 
   get receiver(): Bytes {
@@ -434,5 +547,132 @@ export class Drip extends Entity {
 
   set endTime(value: BigInt) {
     this.set("endTime", Value.fromBigInt(value));
+  }
+}
+
+export class SplitsConfig extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+
+    this.set("receiverAddresses", Value.fromBytesArray(new Array(0)));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id != null, "Cannot save SplitsConfig entity without an ID");
+    if (id) {
+      assert(
+        id.kind == ValueKind.STRING,
+        "Cannot save SplitsConfig entity with non-string ID. " +
+          'Considering using .toHex() to convert the "id" to a string.'
+      );
+      store.set("SplitsConfig", id.toString(), this);
+    }
+  }
+
+  static load(id: string): SplitsConfig | null {
+    return changetype<SplitsConfig | null>(store.get("SplitsConfig", id));
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value!.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get receiverAddresses(): Array<Bytes> {
+    let value = this.get("receiverAddresses");
+    return value!.toBytesArray();
+  }
+
+  set receiverAddresses(value: Array<Bytes>) {
+    this.set("receiverAddresses", Value.fromBytesArray(value));
+  }
+
+  get splitsEntries(): Array<string> {
+    let value = this.get("splitsEntries");
+    return value!.toStringArray();
+  }
+
+  set splitsEntries(value: Array<string>) {
+    this.set("splitsEntries", Value.fromStringArray(value));
+  }
+}
+
+export class SplitsEntry extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+
+    this.set("user", Value.fromBytes(Bytes.empty()));
+    this.set("splitsConfig", Value.fromString(""));
+    this.set("receiver", Value.fromBytes(Bytes.empty()));
+    this.set("percent", Value.fromBigInt(BigInt.zero()));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id != null, "Cannot save SplitsEntry entity without an ID");
+    if (id) {
+      assert(
+        id.kind == ValueKind.STRING,
+        "Cannot save SplitsEntry entity with non-string ID. " +
+          'Considering using .toHex() to convert the "id" to a string.'
+      );
+      store.set("SplitsEntry", id.toString(), this);
+    }
+  }
+
+  static load(id: string): SplitsEntry | null {
+    return changetype<SplitsEntry | null>(store.get("SplitsEntry", id));
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value!.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get user(): Bytes {
+    let value = this.get("user");
+    return value!.toBytes();
+  }
+
+  set user(value: Bytes) {
+    this.set("user", Value.fromBytes(value));
+  }
+
+  get splitsConfig(): string {
+    let value = this.get("splitsConfig");
+    return value!.toString();
+  }
+
+  set splitsConfig(value: string) {
+    this.set("splitsConfig", Value.fromString(value));
+  }
+
+  get receiver(): Bytes {
+    let value = this.get("receiver");
+    return value!.toBytes();
+  }
+
+  set receiver(value: Bytes) {
+    this.set("receiver", Value.fromBytes(value));
+  }
+
+  get percent(): BigInt {
+    let value = this.get("percent");
+    return value!.toBigInt();
+  }
+
+  set percent(value: BigInt) {
+    this.set("percent", Value.fromBigInt(value));
   }
 }

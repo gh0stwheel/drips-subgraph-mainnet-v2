@@ -4,9 +4,9 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: RadicleRegistry
-    network: mainnet
+    network: matic
     source:
-      address: "0x40e9340BE9326b2e026fDBEfe775F1515939bD46"
+      address: "0x2f91577AC283a57C2AA06dc579d1ce1391151103"
       abi: RadicleRegistry
       startBlock: 8774325
     mapping:
@@ -26,9 +26,9 @@ dataSources:
       file: ./src/mapping.ts
   - kind: ethereum/contract
     name: DaiDripsHub
-    network: mainnet
+    network: matic
     source:
-      address: "0x73043143e0a6418cc45d82d4505b096b802fd365"
+      address: "0x8715FA4d3831301Ae46EbF19bE37F7a2CA9655D3"
       abi: DaiDripsHub
       startBlock: 8774325
     mapping:
@@ -44,12 +44,20 @@ dataSources:
         - event: Collected(indexed address,uint128,uint128)
           handler: handleCollected
         - event: Dripping(indexed address,indexed address,uint128,uint64)
-          handler: handleDrippingUpdate
+          handler: handleDripping
+        - event: Dripping(indexed address,indexed uint256,indexed address,uint128,uint64)
+          handler: handleDrippingWithAccount
+        - event: SplitsUpdated(indexed address,(address,uint32)[])
+          handler: handleSplitsUpdated
+        - event: DripsUpdated(indexed address,uint128,(address,uint128)[])
+          handler: handleDripsUpdated
+        - event: DripsUpdated(indexed address,indexed uint256,uint128,(address,uint128)[])
+          handler: handleDripsUpdatedWithAccount
       file: ./src/mapping.ts
 templates:
   - kind: ethereum/contract
     name: DripsToken
-    network: mainnet
+    network: matic
     source:
       abi: DripsToken
     mapping:

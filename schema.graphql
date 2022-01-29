@@ -20,6 +20,8 @@ type TokenType @entity {
   minAmtPerSec: BigInt!
   fundingProject: FundingProject!
   ipfsHash: String
+  currentTotalAmtPerSec: BigInt!
+  currentTotalGiven: BigInt!
 }
 
 type Token @entity {
@@ -30,13 +32,37 @@ type Token @entity {
   tokenReceiver: Bytes! # address
   rank: BigInt!
   amtPerSec: BigInt!
+  giveAmt: BigInt!
   fundingProject: FundingProject!
 }
 
-type Drip @entity {
-  id: ID! # user + "-" + receiver
-  user: Bytes! # address
-  receiver: Bytes! # address
+type DripsConfig @entity {
+  id: ID! # user
+  dripsEntries: [DripsEntry!]! @derivedFrom(field: "dripsConfig")
+  balance: BigInt!
+}
+
+type DripsEntry @entity {
+  id: ID! # user + "-" + receiver + ["-" + account if present]
+  user: Bytes! # the user's address
+  dripsConfig: DripsConfig!
+  isAccountDrip: Boolean! # true if this is an account Drip, false otherwise
+  account: BigInt! # the user's account
+  receiver: Bytes! # the receiver's address
   amtPerSec: BigInt!
   endTime: BigInt!
+}
+
+type SplitsConfig @entity {
+  id: ID! # user
+  receiverAddresses: [Bytes!]!
+  splitsEntries: [SplitsEntry!]! @derivedFrom(field: "splitsConfig")
+}
+
+type SplitsEntry @entity {
+  id: ID! # user + "-" + receiver
+  user: Bytes! # the user's address
+  splitsConfig: SplitsConfig!
+  receiver: Bytes! # the receiver's address
+  percent: BigInt!
 }
