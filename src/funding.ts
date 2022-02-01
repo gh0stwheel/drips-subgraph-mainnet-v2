@@ -58,7 +58,7 @@ export function handleNewToken(event: NewToken): void {
   if (!tokenType) {
     return
   }
-  tokenType.currentTotalGiven = tokenType.currentTotalAmtPerSec.plus(entity.giveAmt)
+  tokenType.currentTotalGiven = tokenType.currentTotalGiven.plus(entity.giveAmt)
   tokenType.save()
 }
 

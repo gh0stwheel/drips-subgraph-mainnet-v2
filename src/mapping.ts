@@ -101,7 +101,7 @@ export function handleSplitsUpdated(event: SplitsUpdated): void {
     for (let i=0; i<splitsConfig.receiverAddresses.length; i++) {
       let receiverAddress = splitsConfig.receiverAddresses[i]
       let splitId = event.params.user.toHex() + "-" + receiverAddress.toHex()
-      store.remove('Split', splitId)
+      store.remove('SplitsEntry', splitId)
     }
     // Clear the receiverAddresses array
     splitsConfig.receiverAddresses.splice(0, splitsConfig.receiverAddresses.length)
