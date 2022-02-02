@@ -56,13 +56,6 @@ type DripsEntry @entity {
 type SplitsConfig @entity {
   id: ID! # user
   receiverAddresses: [Bytes!]!
-  splitsEntries: [SplitsEntry!]! @derivedFrom(field: "splitsConfig")
+  receiverPercentages: [BigInt!]!
 }
 
-type SplitsEntry @entity {
-  id: ID! # user + "-" + receiver
-  user: Bytes! # the user's address
-  splitsConfig: SplitsConfig!
-  receiver: Bytes! # the receiver's address
-  percent: BigInt!
-}

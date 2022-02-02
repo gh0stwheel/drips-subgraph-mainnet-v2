@@ -556,6 +556,7 @@ export class SplitsConfig extends Entity {
     this.set("id", Value.fromString(id));
 
     this.set("receiverAddresses", Value.fromBytesArray(new Array(0)));
+    this.set("receiverPercentages", Value.fromBigIntArray(new Array(0)));
   }
 
   save(): void {
@@ -593,86 +594,12 @@ export class SplitsConfig extends Entity {
     this.set("receiverAddresses", Value.fromBytesArray(value));
   }
 
-  get splitsEntries(): Array<string> {
-    let value = this.get("splitsEntries");
-    return value!.toStringArray();
+  get receiverPercentages(): Array<BigInt> {
+    let value = this.get("receiverPercentages");
+    return value!.toBigIntArray();
   }
 
-  set splitsEntries(value: Array<string>) {
-    this.set("splitsEntries", Value.fromStringArray(value));
-  }
-}
-
-export class SplitsEntry extends Entity {
-  constructor(id: string) {
-    super();
-    this.set("id", Value.fromString(id));
-
-    this.set("user", Value.fromBytes(Bytes.empty()));
-    this.set("splitsConfig", Value.fromString(""));
-    this.set("receiver", Value.fromBytes(Bytes.empty()));
-    this.set("percent", Value.fromBigInt(BigInt.zero()));
-  }
-
-  save(): void {
-    let id = this.get("id");
-    assert(id != null, "Cannot save SplitsEntry entity without an ID");
-    if (id) {
-      assert(
-        id.kind == ValueKind.STRING,
-        "Cannot save SplitsEntry entity with non-string ID. " +
-          'Considering using .toHex() to convert the "id" to a string.'
-      );
-      store.set("SplitsEntry", id.toString(), this);
-    }
-  }
-
-  static load(id: string): SplitsEntry | null {
-    return changetype<SplitsEntry | null>(store.get("SplitsEntry", id));
-  }
-
-  get id(): string {
-    let value = this.get("id");
-    return value!.toString();
-  }
-
-  set id(value: string) {
-    this.set("id", Value.fromString(value));
-  }
-
-  get user(): Bytes {
-    let value = this.get("user");
-    return value!.toBytes();
-  }
-
-  set user(value: Bytes) {
-    this.set("user", Value.fromBytes(value));
-  }
-
-  get splitsConfig(): string {
-    let value = this.get("splitsConfig");
-    return value!.toString();
-  }
-
-  set splitsConfig(value: string) {
-    this.set("splitsConfig", Value.fromString(value));
-  }
-
-  get receiver(): Bytes {
-    let value = this.get("receiver");
-    return value!.toBytes();
-  }
-
-  set receiver(value: Bytes) {
-    this.set("receiver", Value.fromBytes(value));
-  }
-
-  get percent(): BigInt {
-    let value = this.get("percent");
-    return value!.toBigInt();
-  }
-
-  set percent(value: BigInt) {
-    this.set("percent", Value.fromBigInt(value));
+  set receiverPercentages(value: Array<BigInt>) {
+    this.set("receiverPercentages", Value.fromBigIntArray(value));
   }
 }

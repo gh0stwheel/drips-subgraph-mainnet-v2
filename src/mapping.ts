@@ -6,7 +6,7 @@ import {
 import {
   Collected, Dripping, Dripping1, Split, SplitsUpdated, SplitsUpdatedReceiversStruct, DripsUpdated, DripsUpdated1
 } from "../generated/DaiDripsHub/DaiDripsHub"
-import { FundingProject, DripsConfig, DripsEntry, SplitsConfig, SplitsEntry} from "../generated/schema"
+import { FundingProject, DripsConfig, DripsEntry, SplitsConfig} from "../generated/schema"
 import { DripsToken } from '../generated/templates';
 import { store } from '@graphprotocol/graph-ts'
 
@@ -97,14 +97,8 @@ export function handleSplitsUpdated(event: SplitsUpdated): void {
   if (!splitsConfig) {
     splitsConfig = new SplitsConfig(splitsConfigId)
   } else {
-    // Now we need to delete the old Splits entities and clear the receiverAddresses field on SplitsConfig
-    for (let i=0; i<splitsConfig.receiverAddresses.length; i++) {
-      let receiverAddress = splitsConfig.receiverAddresses[i]
-      let splitId = event.params.user.toHex() + "-" + receiverAddress.toHex()
-      store.remove('SplitsEntry', splitId)
-    }
-    // Clear the receiverAddresses array
     splitsConfig.receiverAddresses.splice(0, splitsConfig.receiverAddresses.length)
+    splitsConfig.receiverPercentages.splice(0, splitsConfig.receiverAddresses.length)
   }
   
   // Now we need to add the new Splits as entities and to the receiverAddresses field on SplitsConfig
@@ -112,15 +106,10 @@ export function handleSplitsUpdated(event: SplitsUpdated): void {
     // First create the new Split entity and save it
     let receiver = event.params.receivers[i]
     let receiverAddress = receiver.receiver
-    let splitId = event.params.user.toHex() + "-" + receiverAddress.toHex()
-    let split = new SplitsEntry(splitId)
-    split.receiver = receiverAddress;
-    split.splitsConfig = receiverAddress.toHex()
-    split.percent = receiver.weight
-    split.save()
-
-    // Next add the receiver address to the SplitsConfig
+    let receiverPercentage = receiver.weight
+    
     splitsConfig.receiverAddresses.push(receiverAddress)
+    splitsConfig.receiverPercentages.push(receiverPercentage)
   }
   
   splitsConfig.save()
