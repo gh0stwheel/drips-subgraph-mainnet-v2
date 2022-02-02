@@ -58,4 +58,3 @@ type SplitsConfig @entity {
   receiverAddresses: [Bytes!]!
   receiverPercentages: [BigInt!]!
 }
-
