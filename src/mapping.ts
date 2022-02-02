@@ -96,10 +96,9 @@ export function handleSplitsUpdated(event: SplitsUpdated): void {
 
   if (!splitsConfig) {
     splitsConfig = new SplitsConfig(splitsConfigId)
-  } else {
-    splitsConfig.receiverAddresses.splice(0, splitsConfig.receiverAddresses.length)
-    splitsConfig.receiverPercentages.splice(0, splitsConfig.receiverAddresses.length)
   }
+  splitsConfig.receiverAddresses = []
+  splitsConfig.receiverPercentages = []
   
   // Now we need to add the new Splits as entities and to the receiverAddresses field on SplitsConfig
   for (let i=0; i<event.params.receivers.length; i++) {
