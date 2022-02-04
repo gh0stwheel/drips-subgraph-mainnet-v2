@@ -114,7 +114,7 @@ export function handleSplitsUpdated(event: SplitsUpdated): void {
       }
     }
   }
-  
+
   splitsConfig.save()
 }
 
