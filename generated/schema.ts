@@ -556,7 +556,6 @@ export class SplitsConfig extends Entity {
     this.set("id", Value.fromString(id));
 
     this.set("receiverAddresses", Value.fromBytesArray(new Array(0)));
-    this.set("receiverPercentages", Value.fromBigIntArray(new Array(0)));
   }
 
   save(): void {
@@ -594,12 +593,86 @@ export class SplitsConfig extends Entity {
     this.set("receiverAddresses", Value.fromBytesArray(value));
   }
 
-  get receiverPercentages(): Array<BigInt> {
-    let value = this.get("receiverPercentages");
-    return value!.toBigIntArray();
+  get splitsEntries(): Array<string> {
+    let value = this.get("splitsEntries");
+    return value!.toStringArray();
   }
 
-  set receiverPercentages(value: Array<BigInt>) {
-    this.set("receiverPercentages", Value.fromBigIntArray(value));
+  set splitsEntries(value: Array<string>) {
+    this.set("splitsEntries", Value.fromStringArray(value));
+  }
+}
+
+export class SplitsEntry extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+
+    this.set("splitsConfig", Value.fromString(""));
+    this.set("sender", Value.fromBytes(Bytes.empty()));
+    this.set("receiver", Value.fromBytes(Bytes.empty()));
+    this.set("weight", Value.fromBigInt(BigInt.zero()));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id != null, "Cannot save SplitsEntry entity without an ID");
+    if (id) {
+      assert(
+        id.kind == ValueKind.STRING,
+        "Cannot save SplitsEntry entity with non-string ID. " +
+          'Considering using .toHex() to convert the "id" to a string.'
+      );
+      store.set("SplitsEntry", id.toString(), this);
+    }
+  }
+
+  static load(id: string): SplitsEntry | null {
+    return changetype<SplitsEntry | null>(store.get("SplitsEntry", id));
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value!.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get splitsConfig(): string {
+    let value = this.get("splitsConfig");
+    return value!.toString();
+  }
+
+  set splitsConfig(value: string) {
+    this.set("splitsConfig", Value.fromString(value));
+  }
+
+  get sender(): Bytes {
+    let value = this.get("sender");
+    return value!.toBytes();
+  }
+
+  set sender(value: Bytes) {
+    this.set("sender", Value.fromBytes(value));
+  }
+
+  get receiver(): Bytes {
+    let value = this.get("receiver");
+    return value!.toBytes();
+  }
+
+  set receiver(value: Bytes) {
+    this.set("receiver", Value.fromBytes(value));
+  }
+
+  get weight(): BigInt {
+    let value = this.get("weight");
+    return value!.toBigInt();
+  }
+
+  set weight(value: BigInt) {
+    this.set("weight", Value.fromBigInt(value));
   }
 }
