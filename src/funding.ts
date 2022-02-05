@@ -5,84 +5,84 @@ import { BigInt } from "@graphprotocol/graph-ts"
 import { concat } from "@graphprotocol/graph-ts/helper-functions";
 
 export function handleNewType(event: NewType): void {
-  let entity = new TokenType(event.address.toHex() + "-" + event.params.nftType.toString())
+  let tokenType = new TokenType(event.address.toHex() + "-" + event.params.nftType.toString())
 
-  entity.tokenRegistryAddress = event.address
-  entity.tokenTypeId = event.params.nftType
-  entity.limit = event.params.limit
-  entity.minAmtPerSec = event.params.minAmt
-  entity.streaming = event.params.streaming
-  entity.fundingProject = event.address.toHex()
-  entity.ipfsHash = event.params.ipfsHash
-  entity.currentTotalAmtPerSec = new BigInt(0)
-  entity.currentTotalGiven = new BigInt(0)
+  tokenType.tokenRegistryAddress = event.address
+  tokenType.tokenTypeId = event.params.nftType
+  tokenType.limit = event.params.limit
+  tokenType.minAmtPerSec = event.params.minAmt
+  tokenType.streaming = event.params.streaming
+  tokenType.fundingProject = event.address.toHex()
+  tokenType.ipfsHash = event.params.ipfsHash
+  tokenType.currentTotalAmtPerSec = new BigInt(0)
+  tokenType.currentTotalGiven = new BigInt(0)
 
-  entity.save()
+  tokenType.save()
 }
 
 export function handleNewStreamingToken(event: NewStreamingToken): void {
-  let entity = new Token(event.params.tokenId.toHex() + event.address.toHex())
+  let token = new Token(event.params.tokenId.toHex() + event.address.toHex())
 
-  entity.tokenId = event.params.tokenId
-  entity.tokenRegistryAddress = event.address
-  entity.tokenType = event.address.toHex() + "-" + event.params.typeId.toString()
-  entity.tokenReceiver = event.params.receiver
-  entity.amtPerSec = event.params.amtPerSec
-  entity.fundingProject = event.address.toHex()
+  token.tokenId = event.params.tokenId
+  token.tokenRegistryAddress = event.address
+  token.tokenType = event.address.toHex() + "-" + event.params.typeId.toString()
+  token.tokenReceiver = event.params.receiver
+  token.amtPerSec = event.params.amtPerSec
+  token.fundingProject = event.address.toHex()
 
-  entity.save()
+  token.save()
 
   // Now we need to add the amtPerSec to the currentTotalAmtPerSec on the TokenType
-  let tokenType = TokenType.load(entity.tokenType)
+  let tokenType = TokenType.load(token.tokenType)
   if (!tokenType) {
     return
   }
-  tokenType.currentTotalAmtPerSec = tokenType.currentTotalAmtPerSec.plus(entity.amtPerSec)
+  tokenType.currentTotalAmtPerSec = tokenType.currentTotalAmtPerSec.plus(token.amtPerSec)
   tokenType.save()
 }
 
 export function handleNewToken(event: NewToken): void {
-  let entity = new Token(event.params.tokenId.toHex() + event.address.toHex())
+  let token = new Token(event.params.tokenId.toHex() + event.address.toHex())
 
-  entity.tokenId = event.params.tokenId
-  entity.tokenRegistryAddress = event.address
-  entity.tokenType = event.address.toHex() + "-" + event.params.typeId.toString()
-  entity.tokenReceiver = event.params.receiver
-  entity.giveAmt = event.params.giveAmt
-  entity.fundingProject = event.address.toHex()
+  token.tokenId = event.params.tokenId
+  token.tokenRegistryAddress = event.address
+  token.tokenType = event.address.toHex() + "-" + event.params.typeId.toString()
+  token.tokenReceiver = event.params.receiver
+  token.giveAmt = event.params.giveAmt
+  token.fundingProject = event.address.toHex()
 
-  entity.save()
+  token.save()
 
   // Now we need to add the amtPerSec to the currentTotalAmtPerSec on the TokenType
-  let tokenType = TokenType.load(entity.tokenType)
+  let tokenType = TokenType.load(token.tokenType)
   if (!tokenType) {
     return
   }
-  tokenType.currentTotalGiven = tokenType.currentTotalGiven.plus(entity.giveAmt)
+  tokenType.currentTotalGiven = tokenType.currentTotalGiven.plus(token.giveAmt)
   tokenType.save()
 }
 
 export function handleTransfer(event: Transfer): void {
-  let entity = Token.load(event.params.tokenId.toHex() + event.address.toHex())
+  let token = Token.load(event.params.tokenId.toHex() + event.address.toHex())
 
-  if (!entity) {
+  if (!token) {
     return
   }
 
-  entity.tokenReceiver = event.params.to
+  token.tokenReceiver = event.params.to
   
-  entity.save()
+  token.save()
 }
 
 export function handleNewContractURI(event: NewContractURI): void {
 
-  let entity = FundingProject.load(event.address.toHex())
+  let fundingProject = FundingProject.load(event.address.toHex())
 
-  if (!entity) {
+  if (!fundingProject) {
     return
   }
 
-  entity.ipfsHash = event.params.contractURI
+  fundingProject.ipfsHash = event.params.contractURI
 
-  entity.save()
+  fundingProject.save()
 }

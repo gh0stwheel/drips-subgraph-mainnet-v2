@@ -12,82 +12,88 @@ import { store,ethereum,log } from '@graphprotocol/graph-ts'
 
 export function handleNewProject(event: NewProject): void {
 
-  let entity = new FundingProject(event.params.fundingToken.toHex())
-  entity.projectName = event.params.name
-  entity.daiCollected = new BigInt(0)
+  let fundingProject = new FundingProject(event.params.fundingToken.toHex())
+  fundingProject.projectName = event.params.name
+  fundingProject.daiCollected = new BigInt(0)
 
   // Entity fields can be set based on event parameters
-  entity.projectOwner = event.params.projectOwner
-  entity.dripsTokenTemplate = event.params.dripTokenTemplate
+  fundingProject.projectOwner = event.params.projectOwner
+  fundingProject.dripsTokenTemplate = event.params.dripTokenTemplate
   if (event.block) {
-    entity.blockTimestampCreated = event.block.timestamp
+    fundingProject.blockTimestampCreated = event.block.timestamp
   }
-  entity.save()
+  fundingProject.save()
 
   DripsToken.create(event.params.fundingToken);
 }
 
 export function handleCollected(event: Collected): void {
 
-  let entity = FundingProject.load(event.params.user.toHex())
+  let fundingProject = FundingProject.load(event.params.user.toHex())
 
-  if (!entity) {
+  if (!fundingProject) {
     return
   }
 
-  entity.daiCollected = entity.daiCollected.plus(event.params.collected)
-  entity.daiSplit = entity.daiSplit.plus(event.params.split)
+  fundingProject.daiCollected = fundingProject.daiCollected.plus(event.params.collected)
+  fundingProject.daiSplit = fundingProject.daiSplit.plus(event.params.split)
 
-  entity.save()
+  fundingProject.save()
 }
 
 export function handleDripping(event: Dripping): void {
-  checkDripsConfigExists(event.params.user.toHex())
-  let dripId = event.params.user.toHex() + "-" + event.params.receiver.toHex()
-  let entity = DripsEntry.load(dripId)
+  let dripsConfigId = event.params.user.toHex()
+  let dripsConfig = DripsConfig.load(dripsConfigId)
+  if (!dripsConfig) {
+    dripsConfig = new DripsConfig(dripsConfigId)
+    dripsConfig.balance = new BigInt(0)
+  }
+  dripsConfig.lastUpdatedBlockTimestamp = event.block.timestamp
+  dripsConfig.save()
 
-  if (!entity) {
-    entity = new DripsEntry(dripId)
+  let dripId = event.params.user.toHex() + "-" + event.params.receiver.toHex()
+  let dripsEntry = DripsEntry.load(dripId)
+
+  if (!dripsEntry) {
+    dripsEntry = new DripsEntry(dripId)
   }
 
-  entity.user = event.params.user
-  entity.dripsConfig = event.params.user.toHex()
-  entity.isAccountDrip = false
-  entity.receiver = event.params.receiver
-  entity.amtPerSec = event.params.amtPerSec
-  entity.endTime = event.params.endTime
+  dripsEntry.user = event.params.user
+  dripsEntry.dripsConfig = event.params.user.toHex()
+  dripsEntry.isAccountDrip = false
+  dripsEntry.receiver = event.params.receiver
+  dripsEntry.amtPerSec = event.params.amtPerSec
+  dripsEntry.endTime = event.params.endTime
 
-  entity.save()
+  dripsEntry.save()
 }
 
 export function handleDrippingWithAccount(event: Dripping1): void {
-  checkDripsConfigExists(event.params.user.toHex())
+  let dripsConfigId = event.params.user.toHex()
+  let dripsConfig = DripsConfig.load(dripsConfigId)
+  if (!dripsConfig) {
+    dripsConfig = new DripsConfig(dripsConfigId)
+    dripsConfig.balance = new BigInt(0)
+  }
+  dripsConfig.lastUpdatedBlockTimestamp = event.block.timestamp
+  dripsConfig.save()
+
   let dripId = event.params.user.toHex() + "-" + event.params.receiver.toHex() + "-" + event.params.account.toHex()
-  let entity = DripsEntry.load(dripId)
+  let dripsEntry = DripsEntry.load(dripId)
 
-  if (!entity) {
-    entity = new DripsEntry(dripId)
+  if (!dripsEntry) {
+    dripsEntry = new DripsEntry(dripId)
   }
 
-  entity.user = event.params.user
-  entity.dripsConfig = event.params.user.toHex()
-  entity.isAccountDrip = true
-  entity.account = event.params.account
-  entity.receiver = event.params.receiver
-  entity.amtPerSec = event.params.amtPerSec
-  entity.endTime = event.params.endTime
+  dripsEntry.user = event.params.user
+  dripsEntry.dripsConfig = event.params.user.toHex()
+  dripsEntry.isAccountDrip = true
+  dripsEntry.account = event.params.account
+  dripsEntry.receiver = event.params.receiver
+  dripsEntry.amtPerSec = event.params.amtPerSec
+  dripsEntry.endTime = event.params.endTime
 
-  entity.save()
-}
-
-function checkDripsConfigExists(id: string): void {
-  let entity = DripsConfig.load(id)
-  if (!entity) {
-    entity = new DripsConfig(id)
-    entity.balance = new BigInt(0)
-    // Only save if it didn't already exist
-    entity.save()
-  }
+  dripsEntry.save()
 }
 
 export function handleSplitsUpdated(event: SplitsUpdated): void {
@@ -122,6 +128,7 @@ export function handleSplitsUpdated(event: SplitsUpdated): void {
     splitsEntry.save()
 
     // Next add the receiver address to the SplitsConfig
+    splitsConfig.lastUpdatedBlockTimestamp = event.block.timestamp
     splitsConfig.receiverAddresses.push(receiverAddress)
   }
 
@@ -130,22 +137,24 @@ export function handleSplitsUpdated(event: SplitsUpdated): void {
 
 export function handleDripsUpdated(event: DripsUpdated): void {
   let id = event.params.user.toHex()
-  let entity = DripsConfig.load(id)
-  if (!entity) {
-    entity = new DripsConfig(id)
+  let dripsConfig = DripsConfig.load(id)
+  if (!dripsConfig) {
+    dripsConfig = new DripsConfig(id)
   }
-  entity.balance = event.params.balance
+  dripsConfig.balance = event.params.balance
 
-  entity.save()
+  dripsConfig.lastUpdatedBlockTimestamp = event.block.timestamp
+  dripsConfig.save()
 }
 
 export function handleDripsUpdatedWithAccount(event: DripsUpdated1): void {
   let id = event.params.user.toHex()
-  let entity = DripsConfig.load(id)
-  if (!entity) {
-    entity = new DripsConfig(id)
+  let dripsConfig = DripsConfig.load(id)
+  if (!dripsConfig) {
+    dripsConfig = new DripsConfig(id)
   }
-  entity.balance = event.params.balance
+  dripsConfig.balance = event.params.balance
 
-  entity.save()
+  dripsConfig.lastUpdatedBlockTimestamp = event.block.timestamp
+  dripsConfig.save()
 }

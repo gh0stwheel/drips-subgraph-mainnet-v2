@@ -38,6 +38,7 @@ type Token @entity {
 
 type DripsConfig @entity {
   id: ID! # user
+  lastUpdatedBlockTimestamp: BigInt!
   dripsEntries: [DripsEntry!]! @derivedFrom(field: "dripsConfig")
   balance: BigInt!
 }
@@ -55,6 +56,7 @@ type DripsEntry @entity {
 
 type SplitsConfig @entity {
   id: ID! # user
+  lastUpdatedBlockTimestamp: BigInt!
   receiverAddresses: [Bytes!]!
   splitsEntries: [SplitsEntry!]! @derivedFrom(field: "splitsConfig")
 }

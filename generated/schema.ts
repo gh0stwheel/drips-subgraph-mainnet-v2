@@ -397,6 +397,7 @@ export class DripsConfig extends Entity {
     super();
     this.set("id", Value.fromString(id));
 
+    this.set("lastUpdatedBlockTimestamp", Value.fromBigInt(BigInt.zero()));
     this.set("balance", Value.fromBigInt(BigInt.zero()));
   }
 
@@ -424,6 +425,15 @@ export class DripsConfig extends Entity {
 
   set id(value: string) {
     this.set("id", Value.fromString(value));
+  }
+
+  get lastUpdatedBlockTimestamp(): BigInt {
+    let value = this.get("lastUpdatedBlockTimestamp");
+    return value!.toBigInt();
+  }
+
+  set lastUpdatedBlockTimestamp(value: BigInt) {
+    this.set("lastUpdatedBlockTimestamp", Value.fromBigInt(value));
   }
 
   get dripsEntries(): Array<string> {
@@ -554,6 +564,7 @@ export class SplitsConfig extends Entity {
     super();
     this.set("id", Value.fromString(id));
 
+    this.set("lastUpdatedBlockTimestamp", Value.fromBigInt(BigInt.zero()));
     this.set("receiverAddresses", Value.fromBytesArray(new Array(0)));
   }
 
@@ -581,6 +592,15 @@ export class SplitsConfig extends Entity {
 
   set id(value: string) {
     this.set("id", Value.fromString(value));
+  }
+
+  get lastUpdatedBlockTimestamp(): BigInt {
+    let value = this.get("lastUpdatedBlockTimestamp");
+    return value!.toBigInt();
+  }
+
+  set lastUpdatedBlockTimestamp(value: BigInt) {
+    this.set("lastUpdatedBlockTimestamp", Value.fromBigInt(value));
   }
 
   get receiverAddresses(): Array<Bytes> {
