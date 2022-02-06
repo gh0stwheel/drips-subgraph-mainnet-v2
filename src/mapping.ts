@@ -123,7 +123,7 @@ export function handleSplitsUpdated(event: SplitsUpdated): void {
     let splitsEntry = new SplitsEntry(splitId)
     splitsEntry.sender = event.params.user
     splitsEntry.receiver = receiverAddress
-    splitsEntry.splitsConfig = receiverAddress.toHex()
+    splitsEntry.splitsConfig = splitsConfigId
     splitsEntry.weight = receiver.weight
     splitsEntry.save()
 
