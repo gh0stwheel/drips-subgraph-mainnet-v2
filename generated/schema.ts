@@ -398,7 +398,7 @@ export class DripsConfig extends Entity {
     this.set("id", Value.fromString(id));
 
     this.set("lastUpdatedBlockTimestamp", Value.fromBigInt(BigInt.zero()));
-    this.set("balance", Value.fromBigInt(BigInt.zero()));
+    this.set("dripsEntryIDs", Value.fromStringArray(new Array(0)));
   }
 
   save(): void {
@@ -436,6 +436,15 @@ export class DripsConfig extends Entity {
     this.set("lastUpdatedBlockTimestamp", Value.fromBigInt(value));
   }
 
+  get dripsEntryIDs(): Array<string> {
+    let value = this.get("dripsEntryIDs");
+    return value!.toStringArray();
+  }
+
+  set dripsEntryIDs(value: Array<string>) {
+    this.set("dripsEntryIDs", Value.fromStringArray(value));
+  }
+
   get dripsEntries(): Array<string> {
     let value = this.get("dripsEntries");
     return value!.toStringArray();
@@ -443,6 +452,99 @@ export class DripsConfig extends Entity {
 
   set dripsEntries(value: Array<string>) {
     this.set("dripsEntries", Value.fromStringArray(value));
+  }
+
+  get dripsAccount(): Array<string> {
+    let value = this.get("dripsAccount");
+    return value!.toStringArray();
+  }
+
+  set dripsAccount(value: Array<string>) {
+    this.set("dripsAccount", Value.fromStringArray(value));
+  }
+}
+
+export class DripsAccount extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+
+    this.set("lastUpdatedBlockTimestamp", Value.fromBigInt(BigInt.zero()));
+    this.set("dripsConfig", Value.fromString(""));
+    this.set("isAccountDrip", Value.fromBoolean(false));
+    this.set("account", Value.fromBigInt(BigInt.zero()));
+    this.set("balance", Value.fromBigInt(BigInt.zero()));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id != null, "Cannot save DripsAccount entity without an ID");
+    if (id) {
+      assert(
+        id.kind == ValueKind.STRING,
+        "Cannot save DripsAccount entity with non-string ID. " +
+          'Considering using .toHex() to convert the "id" to a string.'
+      );
+      store.set("DripsAccount", id.toString(), this);
+    }
+  }
+
+  static load(id: string): DripsAccount | null {
+    return changetype<DripsAccount | null>(store.get("DripsAccount", id));
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value!.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get lastUpdatedBlockTimestamp(): BigInt {
+    let value = this.get("lastUpdatedBlockTimestamp");
+    return value!.toBigInt();
+  }
+
+  set lastUpdatedBlockTimestamp(value: BigInt) {
+    this.set("lastUpdatedBlockTimestamp", Value.fromBigInt(value));
+  }
+
+  get dripsConfig(): string {
+    let value = this.get("dripsConfig");
+    return value!.toString();
+  }
+
+  set dripsConfig(value: string) {
+    this.set("dripsConfig", Value.fromString(value));
+  }
+
+  get dripsEntries(): Array<string> {
+    let value = this.get("dripsEntries");
+    return value!.toStringArray();
+  }
+
+  set dripsEntries(value: Array<string>) {
+    this.set("dripsEntries", Value.fromStringArray(value));
+  }
+
+  get isAccountDrip(): boolean {
+    let value = this.get("isAccountDrip");
+    return value!.toBoolean();
+  }
+
+  set isAccountDrip(value: boolean) {
+    this.set("isAccountDrip", Value.fromBoolean(value));
+  }
+
+  get account(): BigInt {
+    let value = this.get("account");
+    return value!.toBigInt();
+  }
+
+  set account(value: BigInt) {
+    this.set("account", Value.fromBigInt(value));
   }
 
   get balance(): BigInt {
@@ -462,11 +564,11 @@ export class DripsEntry extends Entity {
 
     this.set("user", Value.fromBytes(Bytes.empty()));
     this.set("dripsConfig", Value.fromString(""));
+    this.set("dripsAccount", Value.fromString(""));
     this.set("isAccountDrip", Value.fromBoolean(false));
     this.set("account", Value.fromBigInt(BigInt.zero()));
     this.set("receiver", Value.fromBytes(Bytes.empty()));
     this.set("amtPerSec", Value.fromBigInt(BigInt.zero()));
-    this.set("endTime", Value.fromBigInt(BigInt.zero()));
   }
 
   save(): void {
@@ -513,6 +615,15 @@ export class DripsEntry extends Entity {
     this.set("dripsConfig", Value.fromString(value));
   }
 
+  get dripsAccount(): string {
+    let value = this.get("dripsAccount");
+    return value!.toString();
+  }
+
+  set dripsAccount(value: string) {
+    this.set("dripsAccount", Value.fromString(value));
+  }
+
   get isAccountDrip(): boolean {
     let value = this.get("isAccountDrip");
     return value!.toBoolean();
@@ -547,15 +658,6 @@ export class DripsEntry extends Entity {
 
   set amtPerSec(value: BigInt) {
     this.set("amtPerSec", Value.fromBigInt(value));
-  }
-
-  get endTime(): BigInt {
-    let value = this.get("endTime");
-    return value!.toBigInt();
-  }
-
-  set endTime(value: BigInt) {
-    this.set("endTime", Value.fromBigInt(value));
   }
 }
 

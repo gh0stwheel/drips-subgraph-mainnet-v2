@@ -6,7 +6,7 @@ import {
 import {
   Collected, Dripping, Dripping1, Split, SplitsUpdated, SplitsUpdatedReceiversStruct, DripsUpdated, DripsUpdated1
 } from "../generated/DaiDripsHub/DaiDripsHub"
-import { FundingProject, DripsConfig, DripsEntry, SplitsConfig, SplitsEntry} from "../generated/schema"
+import { FundingProject, DripsConfig, DripsAccount, DripsEntry, SplitsConfig, SplitsEntry} from "../generated/schema"
 import { DripsToken } from '../generated/templates';
 import { store,ethereum,log } from '@graphprotocol/graph-ts'
 
@@ -41,6 +41,7 @@ export function handleCollected(event: Collected): void {
   fundingProject.save()
 }
 
+/*
 export function handleDripping(event: Dripping): void {
   let dripsConfigId = event.params.user.toHex()
   let dripsConfig = DripsConfig.load(dripsConfigId)
@@ -94,7 +95,7 @@ export function handleDrippingWithAccount(event: Dripping1): void {
   dripsEntry.endTime = event.params.endTime
 
   dripsEntry.save()
-}
+}*/
 
 export function handleSplitsUpdated(event: SplitsUpdated): void {
   let splitsConfigId = event.params.user.toHex()
@@ -136,24 +137,120 @@ export function handleSplitsUpdated(event: SplitsUpdated): void {
 }
 
 export function handleDripsUpdated(event: DripsUpdated): void {
-  let id = event.params.user.toHex()
-  let dripsConfig = DripsConfig.load(id)
+  
+  // First we update the DripsConfig
+  let dripsConfigId = event.params.user.toHex()
+  let dripsConfig = DripsConfig.load(dripsConfigId)
   if (!dripsConfig) {
-    dripsConfig = new DripsConfig(id)
+    dripsConfig = new DripsConfig(dripsConfigId)
+  } else {
+    // Now we need to delete the old Drips entities and clear the receiverAddresses field on DripsConfig
+    var newDripsEntryIDs: string[]
+    for (let i = 0; i < dripsConfig.dripsEntryIDs.length; i++) {
+      let dripsEntryId = dripsConfig.dripsEntryIDs[i]
+      
+      let dripsEntry = DripsEntry.load(dripsEntryId)
+      if (dripsEntry && dripsEntry.isAccountDrip == false) {
+        store.remove('DripsEntry', dripsEntryId)
+      } else {
+        newDripsEntryIDs.push(dripsEntryId)
+      }
+    }
+    // Clear the receiverAddresses array
+    dripsConfig.dripsEntryIDs = newDripsEntryIDs
   }
-  dripsConfig.balance = event.params.balance
+
+  // Next we create/update the DripsAccount
+  let dripsAccountId = event.params.user.toHex()
+  let dripsAccount = DripsAccount.load(dripsAccountId)
+  if (!dripsAccount) {
+    dripsAccount = new DripsAccount(dripsAccountId)
+    dripsAccount.isAccountDrip = false
+  }
+  dripsAccount.balance = event.params.balance
+  dripsAccount.lastUpdatedBlockTimestamp = event.block.timestamp
+  dripsAccount.save()
+
+  // Now we need to add the new Drips as entities and to the receiverAddresses field on DripsConfig
+  for (let i = 0; i < event.params.receivers.length; i++) {
+    // First create the new Drip entity and save it
+    let receiver = event.params.receivers[i]
+    let receiverAddress = receiver.receiver
+    let dripId = event.params.user.toHex() + "-" + receiverAddress.toHex()
+    let dripsEntry = new DripsEntry(dripId)
+    dripsEntry.user = event.params.user
+    dripsEntry.receiver = receiverAddress
+    dripsEntry.dripsConfig = dripsConfigId
+    dripsEntry.dripsAccount = dripsAccountId
+    dripsEntry.isAccountDrip = false
+    dripsEntry.receiver = receiverAddress
+    dripsEntry.amtPerSec = receiver.amtPerSec
+    dripsEntry.save()
+
+    // Next add the receiver address to the SplitsConfig
+    dripsConfig.dripsEntryIDs.push(dripId)
+  }
 
   dripsConfig.lastUpdatedBlockTimestamp = event.block.timestamp
   dripsConfig.save()
 }
 
 export function handleDripsUpdatedWithAccount(event: DripsUpdated1): void {
-  let id = event.params.user.toHex()
-  let dripsConfig = DripsConfig.load(id)
+
+  // First we update the DripsConfig
+  let dripsConfigId = event.params.user.toHex()
+  let dripsConfig = DripsConfig.load(dripsConfigId)
   if (!dripsConfig) {
-    dripsConfig = new DripsConfig(id)
+    dripsConfig = new DripsConfig(dripsConfigId)
+  } else {
+    // Now we need to delete the old Drips entities and clear the receiverAddresses field on DripsConfig
+    var newDripsEntryIDs: string[]
+    for (let i = 0; i < dripsConfig.dripsEntryIDs.length; i++) {
+      let dripsEntryId = dripsConfig.dripsEntryIDs[i]
+
+      let dripsEntry = DripsEntry.load(dripsEntryId)
+      if (dripsEntry && dripsEntry.isAccountDrip == true && dripsEntry.account.equals(event.params.account)) {
+        store.remove('DripsEntry', dripsEntryId)
+      } else {
+        newDripsEntryIDs.push(dripsEntryId)
+      }
+    }
+    // Clear the receiverAddresses array
+    dripsConfig.dripsEntryIDs = newDripsEntryIDs
   }
-  dripsConfig.balance = event.params.balance
+
+  // Next we create/update the DripsAccount
+  let dripsAccountId = event.params.user.toHex() + "-" + event.params.account.toString()
+  let dripsAccount = DripsAccount.load(dripsAccountId)
+  if (!dripsAccount) {
+    dripsAccount = new DripsAccount(dripsAccountId)
+    dripsAccount.isAccountDrip = true
+    dripsAccount.account = event.params.account
+  }
+  dripsAccount.balance = event.params.balance
+  dripsAccount.lastUpdatedBlockTimestamp = event.block.timestamp
+  dripsAccount.save()
+
+  // Now we need to add the new Drips as entities and to the receiverAddresses field on DripsConfig
+  for (let i = 0; i < event.params.receivers.length; i++) {
+    // First create the new Drip entity and save it
+    let receiver = event.params.receivers[i]
+    let receiverAddress = receiver.receiver
+    let dripId = event.params.user.toHex() + "-" + receiverAddress.toHex()
+    let dripsEntry = new DripsEntry(dripId)
+    dripsEntry.user = event.params.user
+    dripsEntry.receiver = receiverAddress
+    dripsEntry.dripsConfig = dripsConfigId
+    dripsEntry.dripsAccount = dripsAccountId
+    dripsEntry.isAccountDrip = true
+    dripsEntry.account = event.params.account
+    dripsEntry.receiver = receiverAddress
+    dripsEntry.amtPerSec = receiver.amtPerSec
+    dripsEntry.save()
+
+    // Next add the receiver address to the SplitsConfig
+    dripsConfig.dripsEntryIDs.push(dripId)
+  }
 
   dripsConfig.lastUpdatedBlockTimestamp = event.block.timestamp
   dripsConfig.save()

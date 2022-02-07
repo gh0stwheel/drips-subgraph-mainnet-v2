@@ -39,7 +39,18 @@ type Token @entity {
 type DripsConfig @entity {
   id: ID! # user
   lastUpdatedBlockTimestamp: BigInt!
+  dripsEntryIDs: [String!]!
   dripsEntries: [DripsEntry!]! @derivedFrom(field: "dripsConfig")
+  dripsAccount: [DripsAccount!]! @derivedFrom(field: "dripsConfig")
+}
+
+type DripsAccount @entity {
+  id: ID! # user + ["-" + account if present]
+  lastUpdatedBlockTimestamp: BigInt!
+  dripsConfig: DripsConfig!
+  dripsEntries: [DripsEntry!]! @derivedFrom(field: "dripsAccount")
+  isAccountDrip: Boolean! # true if this is a sub-account
+  account: BigInt! # the sub-account (if isAccountDrip == true)
   balance: BigInt!
 }
 
@@ -47,11 +58,11 @@ type DripsEntry @entity {
   id: ID! # user + "-" + receiver + ["-" + account if present]
   user: Bytes! # the user's address
   dripsConfig: DripsConfig!
+  dripsAccount: DripsAccount!
   isAccountDrip: Boolean! # true if this is an account Drip, false otherwise
   account: BigInt! # the user's account
   receiver: Bytes! # the receiver's address
   amtPerSec: BigInt!
-  endTime: BigInt!
 }
 
 type SplitsConfig @entity {
