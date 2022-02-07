@@ -1,14 +1,14 @@
 specVersion: 0.0.2
 schema:
-  file: schema.graphql
+  file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
     name: RadicleRegistry
-    network: mumbai
+    network: {{network}}
     source:
-      address: "0x4e31F3538c9BE4Cf1E0911D08290f5DDF4E57747"
+      address: "{{radicleRegistry.address}}"
       abi: RadicleRegistry
-      startBlock: 23998110
+      startBlock: {{radicleRegistry.block}}
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -17,20 +17,20 @@ dataSources:
         - FundingProject
       abis:
         - name: RadicleRegistry
-          file: RadicleRegistry/abis/RadicleRegistry.json
+          file: ./abis/RadicleRegistry.json
         - name: DripsToken
-          file: RadicleRegistry/abis/DripsToken.json
+          file: ./abis/DripsToken.json
       eventHandlers:
         - event: NewProject(address,indexed address,indexed address,string)
           handler: handleNewProject
-      file: RadicleRegistry/RadicleRegistry.wasm
+      file: ./src/mapping.ts
   - kind: ethereum/contract
     name: DaiDripsHub
-    network: mumbai
+    network: {{network}}
     source:
-      address: "0xC3f15dA8F5B77F514eE84B34007108623f7a828D"
+      address: "{{daiDripsHub.address}}"
       abi: DaiDripsHub
-      startBlock: 23998110
+      startBlock: {{daiDripsHub.block}}
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -39,7 +39,7 @@ dataSources:
         - DaiDripsHub
       abis:
         - name: DaiDripsHub
-          file: DaiDripsHub/abis/DaiDripsHub.json
+          file: ./abis/DaiDripsHub.json
       eventHandlers:
         - event: Collected(indexed address,uint128,uint128)
           handler: handleCollected
@@ -53,25 +53,25 @@ dataSources:
           handler: handleDripsUpdated
         - event: DripsUpdated(indexed address,indexed uint256,uint128,(address,uint128)[])
           handler: handleDripsUpdatedWithAccount
-      file: RadicleRegistry/RadicleRegistry.wasm
+      file: ./src/mapping.ts
 templates:
   - kind: ethereum/contract
     name: DripsToken
-    network: mumbai
+    network: {{network}}
     source:
       abi: DripsToken
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
       language: wasm/assemblyscript
-      file: templates/DripsToken/DripsToken.wasm
+      file: ./src/funding.ts
       entities:
         - FundingProject
         - TokenType
         - Token
       abis:
         - name: DripsToken
-          file: DripsToken/abis/DripsToken.json
+          file: ./abis/DripsToken.json
       eventHandlers:
         - event: NewType(indexed uint128,uint64,uint128,bool,string)
           handler: handleNewType
