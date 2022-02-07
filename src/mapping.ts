@@ -41,62 +41,6 @@ export function handleCollected(event: Collected): void {
   fundingProject.save()
 }
 
-/*
-export function handleDripping(event: Dripping): void {
-  let dripsConfigId = event.params.user.toHex()
-  let dripsConfig = DripsConfig.load(dripsConfigId)
-  if (!dripsConfig) {
-    dripsConfig = new DripsConfig(dripsConfigId)
-    dripsConfig.balance = new BigInt(0)
-  }
-  dripsConfig.lastUpdatedBlockTimestamp = event.block.timestamp
-  dripsConfig.save()
-
-  let dripId = event.params.user.toHex() + "-" + event.params.receiver.toHex()
-  let dripsEntry = DripsEntry.load(dripId)
-
-  if (!dripsEntry) {
-    dripsEntry = new DripsEntry(dripId)
-  }
-
-  dripsEntry.user = event.params.user
-  dripsEntry.dripsConfig = event.params.user.toHex()
-  dripsEntry.isAccountDrip = false
-  dripsEntry.receiver = event.params.receiver
-  dripsEntry.amtPerSec = event.params.amtPerSec
-  dripsEntry.endTime = event.params.endTime
-
-  dripsEntry.save()
-}
-
-export function handleDrippingWithAccount(event: Dripping1): void {
-  let dripsConfigId = event.params.user.toHex()
-  let dripsConfig = DripsConfig.load(dripsConfigId)
-  if (!dripsConfig) {
-    dripsConfig = new DripsConfig(dripsConfigId)
-    dripsConfig.balance = new BigInt(0)
-  }
-  dripsConfig.lastUpdatedBlockTimestamp = event.block.timestamp
-  dripsConfig.save()
-
-  let dripId = event.params.user.toHex() + "-" + event.params.receiver.toHex() + "-" + event.params.account.toHex()
-  let dripsEntry = DripsEntry.load(dripId)
-
-  if (!dripsEntry) {
-    dripsEntry = new DripsEntry(dripId)
-  }
-
-  dripsEntry.user = event.params.user
-  dripsEntry.dripsConfig = event.params.user.toHex()
-  dripsEntry.isAccountDrip = true
-  dripsEntry.account = event.params.account
-  dripsEntry.receiver = event.params.receiver
-  dripsEntry.amtPerSec = event.params.amtPerSec
-  dripsEntry.endTime = event.params.endTime
-
-  dripsEntry.save()
-}*/
-
 export function handleSplitsUpdated(event: SplitsUpdated): void {
   let splitsConfigId = event.params.user.toHex()
   let splitsConfig = SplitsConfig.load(splitsConfigId)
@@ -109,7 +53,6 @@ export function handleSplitsUpdated(event: SplitsUpdated): void {
     for (let i = 0; i < splitsConfig.receiverAddresses.length; i++) {
       let receiverAddress = splitsConfig.receiverAddresses[i]
       let splitId = event.params.user.toHex() + "-" + receiverAddress
-      log.warning('Trying to remove SplitsEntry ' + splitId, [])
       store.remove('SplitsEntry', splitId)
     }
     // Clear the receiverAddresses array
@@ -133,7 +76,6 @@ export function handleSplitsUpdated(event: SplitsUpdated): void {
 
     // Next add the receiver address to the SplitsConfig
     splitsConfig.lastUpdatedBlockTimestamp = event.block.timestamp
-    log.warning('Trying to push split receiverAddress ' + receiverAddress.toHex(), [])
     newReceiverAddresses.push(receiverAddress.toHex())
   }
 
@@ -158,7 +100,6 @@ export function handleDripsUpdated(event: DripsUpdated): void {
       
       let dripsEntry = DripsEntry.load(dripsEntryId)
       if (dripsEntry && dripsEntry.isAccountDrip == false) {
-        log.warning('Trying to remove DripsEntry ' + dripsEntryId, [])
         store.remove('DripsEntry', dripsEntryId)
       } else {
         newDripsEntryIDs.push(dripsEntryId)
@@ -202,7 +143,6 @@ export function handleDripsUpdated(event: DripsUpdated): void {
     dripsEntry.save()
 
     // Next add the receiver address to the SplitsConfig
-    log.warning('Trying to push dripEntryID ' + dripId, [])
     newDripsEntryIDs.push(dripId)
   }
 
@@ -229,7 +169,6 @@ export function handleDripsUpdatedWithAccount(event: DripsUpdated1): void {
 
       let dripsEntry = DripsEntry.load(dripsEntryId)
       if (dripsEntry && dripsEntry.isAccountDrip == true && dripsEntry.account.equals(event.params.account)) {
-        log.warning('Trying to remove DripsEntry ' + dripsEntryId, [])
         store.remove('DripsEntry', dripsEntryId)
       } else {
         newDripsEntryIDs.push(dripsEntryId)
@@ -275,7 +214,6 @@ export function handleDripsUpdatedWithAccount(event: DripsUpdated1): void {
     dripsEntry.save()
 
     // Next add the receiver address to the SplitsConfig
-    log.warning('Trying to push dripEntryID ' + dripId, [])
     newDripsEntryIDs.push(dripId)
   }
 
