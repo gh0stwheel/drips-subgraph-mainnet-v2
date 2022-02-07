@@ -399,6 +399,7 @@ export class DripsConfig extends Entity {
 
     this.set("lastUpdatedBlockTimestamp", Value.fromBigInt(BigInt.zero()));
     this.set("dripsEntryIDs", Value.fromStringArray(new Array(0)));
+    this.set("balance", Value.fromBigInt(BigInt.zero()));
   }
 
   save(): void {
@@ -461,6 +462,15 @@ export class DripsConfig extends Entity {
 
   set dripsAccount(value: Array<string>) {
     this.set("dripsAccount", Value.fromStringArray(value));
+  }
+
+  get balance(): BigInt {
+    let value = this.get("balance");
+    return value!.toBigInt();
+  }
+
+  set balance(value: BigInt) {
+    this.set("balance", Value.fromBigInt(value));
   }
 }
 

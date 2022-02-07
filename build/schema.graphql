@@ -42,6 +42,7 @@ type DripsConfig @entity {
   dripsEntryIDs: [String!]!
   dripsEntries: [DripsEntry!]! @derivedFrom(field: "dripsConfig")
   dripsAccount: [DripsAccount!]! @derivedFrom(field: "dripsConfig")
+  balance: BigInt! # the balance of the main account (for detailed sub-account balances, query DripsAccount)
 }
 
 type DripsAccount @entity {

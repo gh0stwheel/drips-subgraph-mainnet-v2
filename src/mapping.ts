@@ -143,6 +143,7 @@ export function handleDripsUpdated(event: DripsUpdated): void {
   let dripsConfig = DripsConfig.load(dripsConfigId)
   if (!dripsConfig) {
     dripsConfig = new DripsConfig(dripsConfigId)
+    dripsConfig.balance = new BigInt(0)
   } else {
     // Now we need to delete the old Drips entities and clear the receiverAddresses field on DripsConfig
     var newDripsEntryIDs: string[]
@@ -197,6 +198,7 @@ export function handleDripsUpdated(event: DripsUpdated): void {
   }
 
   dripsConfig.lastUpdatedBlockTimestamp = event.block.timestamp
+  dripsConfig.balance = event.params.balance
   dripsConfig.save()
 }
 
@@ -207,6 +209,7 @@ export function handleDripsUpdatedWithAccount(event: DripsUpdated1): void {
   let dripsConfig = DripsConfig.load(dripsConfigId)
   if (!dripsConfig) {
     dripsConfig = new DripsConfig(dripsConfigId)
+    dripsConfig.balance = new BigInt(0)
   } else {
     // Now we need to delete the old Drips entities and clear the receiverAddresses field on DripsConfig
     var newDripsEntryIDs: string[]
