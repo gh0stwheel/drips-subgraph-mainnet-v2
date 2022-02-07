@@ -69,7 +69,7 @@ type DripsEntry @entity {
 type SplitsConfig @entity {
   id: ID! # user
   lastUpdatedBlockTimestamp: BigInt!
-  receiverAddresses: [Bytes!]!
+  receiverAddresses: [String!]!
   splitsEntries: [SplitsEntry!]! @derivedFrom(field: "splitsConfig")
 }
 

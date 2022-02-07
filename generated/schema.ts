@@ -677,7 +677,7 @@ export class SplitsConfig extends Entity {
     this.set("id", Value.fromString(id));
 
     this.set("lastUpdatedBlockTimestamp", Value.fromBigInt(BigInt.zero()));
-    this.set("receiverAddresses", Value.fromBytesArray(new Array(0)));
+    this.set("receiverAddresses", Value.fromStringArray(new Array(0)));
   }
 
   save(): void {
@@ -715,13 +715,13 @@ export class SplitsConfig extends Entity {
     this.set("lastUpdatedBlockTimestamp", Value.fromBigInt(value));
   }
 
-  get receiverAddresses(): Array<Bytes> {
+  get receiverAddresses(): Array<string> {
     let value = this.get("receiverAddresses");
-    return value!.toBytesArray();
+    return value!.toStringArray();
   }
 
-  set receiverAddresses(value: Array<Bytes>) {
-    this.set("receiverAddresses", Value.fromBytesArray(value));
+  set receiverAddresses(value: Array<string>) {
+    this.set("receiverAddresses", Value.fromStringArray(value));
   }
 
   get splitsEntries(): Array<string> {
