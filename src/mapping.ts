@@ -236,7 +236,7 @@ export function handleDripsUpdatedWithAccount(event: DripsUpdated1): void {
     // First create the new Drip entity and save it
     let receiver = event.params.receivers[i]
     let receiverAddress = receiver.receiver
-    let dripId = event.params.user.toHex() + "-" + receiverAddress.toHex()
+    let dripId = event.params.user.toHex() + "-" + receiverAddress.toHex() + "-" + event.params.account.toString()
     let dripsEntry = new DripsEntry(dripId)
     dripsEntry.user = event.params.user
     dripsEntry.receiver = receiverAddress
