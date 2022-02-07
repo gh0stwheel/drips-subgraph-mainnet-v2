@@ -172,10 +172,16 @@ export function handleDripsUpdated(event: DripsUpdated): void {
   dripsAccount.save()
 
   // Now we need to add the new Drips as entities and to the receiverAddresses field on DripsConfig
-  for (let i = 0; i < event.params.receivers.length; i++) {
+  for (let i = 0; i < event.params.receivers.length; i++) {    
     // First create the new Drip entity and save it
     let receiver = event.params.receivers[i]
     let receiverAddress = receiver.receiver
+
+    // For now we're not adding DripsEntries where the user == receiver (these are the NFT Drips)
+    // TODO -- in the future it may make sense to add these to the subgraph and filter them out in 
+    // the front end instead
+    if (event.params.user.toString() == receiverAddress.toString()) continue;
+
     let dripId = event.params.user.toHex() + "-" + receiverAddress.toHex()
     let dripsEntry = new DripsEntry(dripId)
     dripsEntry.user = event.params.user
@@ -183,7 +189,6 @@ export function handleDripsUpdated(event: DripsUpdated): void {
     dripsEntry.dripsConfig = dripsConfigId
     dripsEntry.dripsAccount = dripsAccountId
     dripsEntry.isAccountDrip = false
-    dripsEntry.receiver = receiverAddress
     dripsEntry.amtPerSec = receiver.amtPerSec
     dripsEntry.save()
 
@@ -236,6 +241,12 @@ export function handleDripsUpdatedWithAccount(event: DripsUpdated1): void {
     // First create the new Drip entity and save it
     let receiver = event.params.receivers[i]
     let receiverAddress = receiver.receiver
+
+    // For now we're not adding DripsEntries where the user == receiver (these are the NFT Drips)
+    // TODO -- in the future it may make sense to add these to the subgraph and filter them out in 
+    // the front end instead
+    if (event.params.user.toString() == receiverAddress.toString()) continue;
+
     let dripId = event.params.user.toHex() + "-" + receiverAddress.toHex() + "-" + event.params.account.toString()
     let dripsEntry = new DripsEntry(dripId)
     dripsEntry.user = event.params.user
@@ -244,7 +255,6 @@ export function handleDripsUpdatedWithAccount(event: DripsUpdated1): void {
     dripsEntry.dripsAccount = dripsAccountId
     dripsEntry.isAccountDrip = true
     dripsEntry.account = event.params.account
-    dripsEntry.receiver = receiverAddress
     dripsEntry.amtPerSec = receiver.amtPerSec
     dripsEntry.save()
 
