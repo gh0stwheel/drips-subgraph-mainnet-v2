@@ -7,5 +7,9 @@
   "daiDripsHub": {
     "address": "0xfbcD6918907902c106A99058146CBdBb76a812f6",
     "block": 9795857
+  },
+  "metaData": {
+    "address": "0xA7c764baE70836e9AC3DA1201636c33D9142f627",
+    "block": 9795857
   }
 }

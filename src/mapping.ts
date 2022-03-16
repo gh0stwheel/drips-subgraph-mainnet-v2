@@ -1,14 +1,28 @@
-import { BigInt } from "@graphprotocol/graph-ts"
+import { BigInt, Bytes } from "@graphprotocol/graph-ts"
 import {
   RadicleRegistry,
   NewProject,
 } from "../generated/RadicleRegistry/RadicleRegistry"
 import {
+  MultiHash,
+} from "../generated/MetaData/MetaData"
+import {
   Collected, Dripping, Dripping1, Split, SplitsUpdated, SplitsUpdatedReceiversStruct, DripsUpdated, DripsUpdated1
 } from "../generated/DaiDripsHub/DaiDripsHub"
-import { FundingProject, DripsConfig, DripsAccount, DripsEntry, SplitsConfig, SplitsEntry} from "../generated/schema"
+import { FundingProject, DripsConfig, DripsAccount, DripsEntry, SplitsConfig, SplitsEntry, IdentityMetaData} from "../generated/schema"
 import { DripsToken } from '../generated/templates';
 import { store,ethereum,log } from '@graphprotocol/graph-ts'
+
+export function handleIdentityMetaData(event: MultiHash): void {
+
+  let id = event.params.addr.toHex()
+  let identityMetaData = IdentityMetaData.load(id)
+  if (!identityMetaData) {
+    identityMetaData = new IdentityMetaData(id)
+  }
+  identityMetaData.multiHash = event.params.multiHash
+  identityMetaData.save()
+}
 
 export function handleNewProject(event: NewProject): void {
 

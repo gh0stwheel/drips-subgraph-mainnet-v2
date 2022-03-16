@@ -80,3 +80,8 @@ type SplitsEntry @entity {
   receiver: Bytes! # the receiver's address
   weight: BigInt!
 }
+
+type IdentityMetaData @entity {
+  id: ID! # the address
+  multiHash: Bytes!
+}

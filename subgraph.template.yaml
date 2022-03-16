@@ -3,6 +3,26 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
+    name: MetaData
+    network: {{network}}
+    source:
+      address: "{{metaData.address}}"
+      abi: MetaData
+      startBlock: {{metaData.block}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - IdentityMetaData
+      abis:
+        - name: MetaData
+          file: ./abis/MetaData.json
+      eventHandlers:
+        - event: MultiHash(indexed address,bytes)
+          handler: handleIdentityMetaData
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
     name: RadicleRegistry
     network: {{network}}
     source:
