@@ -19,7 +19,7 @@ dataSources:
         - name: MetaData
           file: ./abis/MetaData.json
       eventHandlers:
-        - event: MultiHash(indexed address,bytes)
+        - event: MultiHash(indexed address,indexed bytes32,bytes)
           handler: handleIdentityMetaData
       file: ./src/mapping.ts
   - kind: ethereum/contract
