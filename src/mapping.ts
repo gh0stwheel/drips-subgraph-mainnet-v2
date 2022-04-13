@@ -172,27 +172,19 @@ export function handleDripsUpdatedWithAccount(event: DripsUpdated1): void {
     dripsConfig.dripsEntryIDs = []
   } else {
     // Now we need to delete the old Drips entities and clear the receiverAddresses field on DripsConfig
-    log.warning("1", []);
     let newDripsEntryIDs: string[] = []
     for (let i = 0; i < dripsConfig.dripsEntryIDs.length; i++) {
-      log.warning("1.1", []);
       let dripsEntryId = dripsConfig.dripsEntryIDs[i]
-      log.warning("1.2", []);
       let dripsEntry = DripsEntry.load(dripsEntryId)
-      log.warning("1.3 " + dripsEntryId, []);
       if (dripsEntry && dripsEntry.isAccountDrip == true && dripsEntry.account.equals(event.params.account)) {
-        log.warning("1.4", []);
         store.remove('DripsEntry', dripsEntryId)
       } else {
-        log.warning("1.5", []);
         newDripsEntryIDs.push(dripsEntryId)
       }
     }
     // Clear the receiverAddresses array
-    log.warning("1.6", []);
     dripsConfig.dripsEntryIDs = newDripsEntryIDs
   }
-  log.warning("2", []);
 
   // Next we create/update the DripsAccount
   let dripsAccountId = event.params.user.toHex() + "-" + event.params.account.toString()
