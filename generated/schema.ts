@@ -11,412 +11,29 @@ import {
   BigDecimal
 } from "@graphprotocol/graph-ts";
 
-export class FundingProject extends Entity {
-  constructor(id: string) {
-    super();
-    this.set("id", Value.fromString(id));
-
-    this.set("projectOwner", Value.fromBytes(Bytes.empty()));
-    this.set("dripsTokenTemplate", Value.fromBytes(Bytes.empty()));
-    this.set("blockTimestampCreated", Value.fromBigInt(BigInt.zero()));
-    this.set("daiCollected", Value.fromBigInt(BigInt.zero()));
-    this.set("daiSplit", Value.fromBigInt(BigInt.zero()));
-  }
-
-  save(): void {
-    let id = this.get("id");
-    assert(id != null, "Cannot save FundingProject entity without an ID");
-    if (id) {
-      assert(
-        id.kind == ValueKind.STRING,
-        "Cannot save FundingProject entity with non-string ID. " +
-          'Considering using .toHex() to convert the "id" to a string.'
-      );
-      store.set("FundingProject", id.toString(), this);
-    }
-  }
-
-  static load(id: string): FundingProject | null {
-    return changetype<FundingProject | null>(store.get("FundingProject", id));
-  }
-
-  get id(): string {
-    let value = this.get("id");
-    return value!.toString();
-  }
-
-  set id(value: string) {
-    this.set("id", Value.fromString(value));
-  }
-
-  get projectName(): string | null {
-    let value = this.get("projectName");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toString();
-    }
-  }
-
-  set projectName(value: string | null) {
-    if (!value) {
-      this.unset("projectName");
-    } else {
-      this.set("projectName", Value.fromString(<string>value));
-    }
-  }
-
-  get projectOwner(): Bytes {
-    let value = this.get("projectOwner");
-    return value!.toBytes();
-  }
-
-  set projectOwner(value: Bytes) {
-    this.set("projectOwner", Value.fromBytes(value));
-  }
-
-  get dripsTokenTemplate(): Bytes {
-    let value = this.get("dripsTokenTemplate");
-    return value!.toBytes();
-  }
-
-  set dripsTokenTemplate(value: Bytes) {
-    this.set("dripsTokenTemplate", Value.fromBytes(value));
-  }
-
-  get blockTimestampCreated(): BigInt {
-    let value = this.get("blockTimestampCreated");
-    return value!.toBigInt();
-  }
-
-  set blockTimestampCreated(value: BigInt) {
-    this.set("blockTimestampCreated", Value.fromBigInt(value));
-  }
-
-  get daiCollected(): BigInt {
-    let value = this.get("daiCollected");
-    return value!.toBigInt();
-  }
-
-  set daiCollected(value: BigInt) {
-    this.set("daiCollected", Value.fromBigInt(value));
-  }
-
-  get daiSplit(): BigInt {
-    let value = this.get("daiSplit");
-    return value!.toBigInt();
-  }
-
-  set daiSplit(value: BigInt) {
-    this.set("daiSplit", Value.fromBigInt(value));
-  }
-
-  get tokenTypes(): Array<string> {
-    let value = this.get("tokenTypes");
-    return value!.toStringArray();
-  }
-
-  set tokenTypes(value: Array<string>) {
-    this.set("tokenTypes", Value.fromStringArray(value));
-  }
-
-  get tokens(): Array<string> {
-    let value = this.get("tokens");
-    return value!.toStringArray();
-  }
-
-  set tokens(value: Array<string>) {
-    this.set("tokens", Value.fromStringArray(value));
-  }
-
-  get ipfsHash(): string | null {
-    let value = this.get("ipfsHash");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toString();
-    }
-  }
-
-  set ipfsHash(value: string | null) {
-    if (!value) {
-      this.unset("ipfsHash");
-    } else {
-      this.set("ipfsHash", Value.fromString(<string>value));
-    }
-  }
-}
-
-export class TokenType extends Entity {
-  constructor(id: string) {
-    super();
-    this.set("id", Value.fromString(id));
-
-    this.set("tokenRegistryAddress", Value.fromBytes(Bytes.empty()));
-    this.set("tokenTypeId", Value.fromBigInt(BigInt.zero()));
-    this.set("streaming", Value.fromBoolean(false));
-    this.set("limit", Value.fromBigInt(BigInt.zero()));
-    this.set("minAmtPerSec", Value.fromBigInt(BigInt.zero()));
-    this.set("fundingProject", Value.fromString(""));
-    this.set("currentTotalAmtPerSec", Value.fromBigInt(BigInt.zero()));
-    this.set("currentTotalGiven", Value.fromBigInt(BigInt.zero()));
-  }
-
-  save(): void {
-    let id = this.get("id");
-    assert(id != null, "Cannot save TokenType entity without an ID");
-    if (id) {
-      assert(
-        id.kind == ValueKind.STRING,
-        "Cannot save TokenType entity with non-string ID. " +
-          'Considering using .toHex() to convert the "id" to a string.'
-      );
-      store.set("TokenType", id.toString(), this);
-    }
-  }
-
-  static load(id: string): TokenType | null {
-    return changetype<TokenType | null>(store.get("TokenType", id));
-  }
-
-  get id(): string {
-    let value = this.get("id");
-    return value!.toString();
-  }
-
-  set id(value: string) {
-    this.set("id", Value.fromString(value));
-  }
-
-  get tokenRegistryAddress(): Bytes {
-    let value = this.get("tokenRegistryAddress");
-    return value!.toBytes();
-  }
-
-  set tokenRegistryAddress(value: Bytes) {
-    this.set("tokenRegistryAddress", Value.fromBytes(value));
-  }
-
-  get tokenTypeId(): BigInt {
-    let value = this.get("tokenTypeId");
-    return value!.toBigInt();
-  }
-
-  set tokenTypeId(value: BigInt) {
-    this.set("tokenTypeId", Value.fromBigInt(value));
-  }
-
-  get streaming(): boolean {
-    let value = this.get("streaming");
-    return value!.toBoolean();
-  }
-
-  set streaming(value: boolean) {
-    this.set("streaming", Value.fromBoolean(value));
-  }
-
-  get limit(): BigInt {
-    let value = this.get("limit");
-    return value!.toBigInt();
-  }
-
-  set limit(value: BigInt) {
-    this.set("limit", Value.fromBigInt(value));
-  }
-
-  get minAmtPerSec(): BigInt {
-    let value = this.get("minAmtPerSec");
-    return value!.toBigInt();
-  }
-
-  set minAmtPerSec(value: BigInt) {
-    this.set("minAmtPerSec", Value.fromBigInt(value));
-  }
-
-  get fundingProject(): string {
-    let value = this.get("fundingProject");
-    return value!.toString();
-  }
-
-  set fundingProject(value: string) {
-    this.set("fundingProject", Value.fromString(value));
-  }
-
-  get ipfsHash(): string | null {
-    let value = this.get("ipfsHash");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toString();
-    }
-  }
-
-  set ipfsHash(value: string | null) {
-    if (!value) {
-      this.unset("ipfsHash");
-    } else {
-      this.set("ipfsHash", Value.fromString(<string>value));
-    }
-  }
-
-  get currentTotalAmtPerSec(): BigInt {
-    let value = this.get("currentTotalAmtPerSec");
-    return value!.toBigInt();
-  }
-
-  set currentTotalAmtPerSec(value: BigInt) {
-    this.set("currentTotalAmtPerSec", Value.fromBigInt(value));
-  }
-
-  get currentTotalGiven(): BigInt {
-    let value = this.get("currentTotalGiven");
-    return value!.toBigInt();
-  }
-
-  set currentTotalGiven(value: BigInt) {
-    this.set("currentTotalGiven", Value.fromBigInt(value));
-  }
-}
-
-export class Token extends Entity {
-  constructor(id: string) {
-    super();
-    this.set("id", Value.fromString(id));
-
-    this.set("tokenId", Value.fromBigInt(BigInt.zero()));
-    this.set("tokenRegistryAddress", Value.fromBytes(Bytes.empty()));
-    this.set("tokenType", Value.fromString(""));
-    this.set("tokenReceiver", Value.fromBytes(Bytes.empty()));
-    this.set("rank", Value.fromBigInt(BigInt.zero()));
-    this.set("amtPerSec", Value.fromBigInt(BigInt.zero()));
-    this.set("giveAmt", Value.fromBigInt(BigInt.zero()));
-    this.set("fundingProject", Value.fromString(""));
-  }
-
-  save(): void {
-    let id = this.get("id");
-    assert(id != null, "Cannot save Token entity without an ID");
-    if (id) {
-      assert(
-        id.kind == ValueKind.STRING,
-        "Cannot save Token entity with non-string ID. " +
-          'Considering using .toHex() to convert the "id" to a string.'
-      );
-      store.set("Token", id.toString(), this);
-    }
-  }
-
-  static load(id: string): Token | null {
-    return changetype<Token | null>(store.get("Token", id));
-  }
-
-  get id(): string {
-    let value = this.get("id");
-    return value!.toString();
-  }
-
-  set id(value: string) {
-    this.set("id", Value.fromString(value));
-  }
-
-  get tokenId(): BigInt {
-    let value = this.get("tokenId");
-    return value!.toBigInt();
-  }
-
-  set tokenId(value: BigInt) {
-    this.set("tokenId", Value.fromBigInt(value));
-  }
-
-  get tokenRegistryAddress(): Bytes {
-    let value = this.get("tokenRegistryAddress");
-    return value!.toBytes();
-  }
-
-  set tokenRegistryAddress(value: Bytes) {
-    this.set("tokenRegistryAddress", Value.fromBytes(value));
-  }
-
-  get tokenType(): string {
-    let value = this.get("tokenType");
-    return value!.toString();
-  }
-
-  set tokenType(value: string) {
-    this.set("tokenType", Value.fromString(value));
-  }
-
-  get tokenReceiver(): Bytes {
-    let value = this.get("tokenReceiver");
-    return value!.toBytes();
-  }
-
-  set tokenReceiver(value: Bytes) {
-    this.set("tokenReceiver", Value.fromBytes(value));
-  }
-
-  get rank(): BigInt {
-    let value = this.get("rank");
-    return value!.toBigInt();
-  }
-
-  set rank(value: BigInt) {
-    this.set("rank", Value.fromBigInt(value));
-  }
-
-  get amtPerSec(): BigInt {
-    let value = this.get("amtPerSec");
-    return value!.toBigInt();
-  }
-
-  set amtPerSec(value: BigInt) {
-    this.set("amtPerSec", Value.fromBigInt(value));
-  }
-
-  get giveAmt(): BigInt {
-    let value = this.get("giveAmt");
-    return value!.toBigInt();
-  }
-
-  set giveAmt(value: BigInt) {
-    this.set("giveAmt", Value.fromBigInt(value));
-  }
-
-  get fundingProject(): string {
-    let value = this.get("fundingProject");
-    return value!.toString();
-  }
-
-  set fundingProject(value: string) {
-    this.set("fundingProject", Value.fromString(value));
-  }
-}
-
-export class DripsConfig extends Entity {
+export class User extends Entity {
   constructor(id: string) {
     super();
     this.set("id", Value.fromString(id));
 
     this.set("lastUpdatedBlockTimestamp", Value.fromBigInt(BigInt.zero()));
-    this.set("dripsEntryIDs", Value.fromStringArray(new Array(0)));
-    this.set("balance", Value.fromBigInt(BigInt.zero()));
   }
 
   save(): void {
     let id = this.get("id");
-    assert(id != null, "Cannot save DripsConfig entity without an ID");
+    assert(id != null, "Cannot save User entity without an ID");
     if (id) {
       assert(
         id.kind == ValueKind.STRING,
-        "Cannot save DripsConfig entity with non-string ID. " +
+        "Cannot save User entity with non-string ID. " +
           'Considering using .toHex() to convert the "id" to a string.'
       );
-      store.set("DripsConfig", id.toString(), this);
+      store.set("User", id.toString(), this);
     }
   }
 
-  static load(id: string): DripsConfig | null {
-    return changetype<DripsConfig | null>(store.get("DripsConfig", id));
+  static load(id: string): User | null {
+    return changetype<User | null>(store.get("User", id));
   }
 
   get id(): string {
@@ -426,6 +43,15 @@ export class DripsConfig extends Entity {
 
   set id(value: string) {
     this.set("id", Value.fromString(value));
+  }
+
+  get assetConfigs(): Array<string> {
+    let value = this.get("assetConfigs");
+    return value!.toStringArray();
+  }
+
+  set assetConfigs(value: Array<string>) {
+    this.set("assetConfigs", Value.fromStringArray(value));
   }
 
   get lastUpdatedBlockTimestamp(): BigInt {
@@ -436,14 +62,72 @@ export class DripsConfig extends Entity {
   set lastUpdatedBlockTimestamp(value: BigInt) {
     this.set("lastUpdatedBlockTimestamp", Value.fromBigInt(value));
   }
+}
 
-  get dripsEntryIDs(): Array<string> {
-    let value = this.get("dripsEntryIDs");
+export class UserAssetConfig extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+
+    this.set("user", Value.fromString(""));
+    this.set("assetId", Value.fromBigInt(BigInt.zero()));
+    this.set("dripsEntryIds", Value.fromStringArray(new Array(0)));
+    this.set("balance", Value.fromBigInt(BigInt.zero()));
+    this.set("assetConfigHash", Value.fromBytes(Bytes.empty()));
+    this.set("lastUpdatedBlockTimestamp", Value.fromBigInt(BigInt.zero()));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id != null, "Cannot save UserAssetConfig entity without an ID");
+    if (id) {
+      assert(
+        id.kind == ValueKind.STRING,
+        "Cannot save UserAssetConfig entity with non-string ID. " +
+          'Considering using .toHex() to convert the "id" to a string.'
+      );
+      store.set("UserAssetConfig", id.toString(), this);
+    }
+  }
+
+  static load(id: string): UserAssetConfig | null {
+    return changetype<UserAssetConfig | null>(store.get("UserAssetConfig", id));
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value!.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get user(): string {
+    let value = this.get("user");
+    return value!.toString();
+  }
+
+  set user(value: string) {
+    this.set("user", Value.fromString(value));
+  }
+
+  get assetId(): BigInt {
+    let value = this.get("assetId");
+    return value!.toBigInt();
+  }
+
+  set assetId(value: BigInt) {
+    this.set("assetId", Value.fromBigInt(value));
+  }
+
+  get dripsEntryIds(): Array<string> {
+    let value = this.get("dripsEntryIds");
     return value!.toStringArray();
   }
 
-  set dripsEntryIDs(value: Array<string>) {
-    this.set("dripsEntryIDs", Value.fromStringArray(value));
+  set dripsEntryIds(value: Array<string>) {
+    this.set("dripsEntryIds", Value.fromStringArray(value));
   }
 
   get dripsEntries(): Array<string> {
@@ -455,15 +139,6 @@ export class DripsConfig extends Entity {
     this.set("dripsEntries", Value.fromStringArray(value));
   }
 
-  get dripsAccount(): Array<string> {
-    let value = this.get("dripsAccount");
-    return value!.toStringArray();
-  }
-
-  set dripsAccount(value: Array<string>) {
-    this.set("dripsAccount", Value.fromStringArray(value));
-  }
-
   get balance(): BigInt {
     let value = this.get("balance");
     return value!.toBigInt();
@@ -472,35 +147,53 @@ export class DripsConfig extends Entity {
   set balance(value: BigInt) {
     this.set("balance", Value.fromBigInt(value));
   }
+
+  get assetConfigHash(): Bytes {
+    let value = this.get("assetConfigHash");
+    return value!.toBytes();
+  }
+
+  set assetConfigHash(value: Bytes) {
+    this.set("assetConfigHash", Value.fromBytes(value));
+  }
+
+  get lastUpdatedBlockTimestamp(): BigInt {
+    let value = this.get("lastUpdatedBlockTimestamp");
+    return value!.toBigInt();
+  }
+
+  set lastUpdatedBlockTimestamp(value: BigInt) {
+    this.set("lastUpdatedBlockTimestamp", Value.fromBigInt(value));
+  }
 }
 
-export class DripsAccount extends Entity {
+export class DripsSetEvent extends Entity {
   constructor(id: string) {
     super();
     this.set("id", Value.fromString(id));
 
-    this.set("lastUpdatedBlockTimestamp", Value.fromBigInt(BigInt.zero()));
-    this.set("dripsConfig", Value.fromString(""));
-    this.set("isAccountDrip", Value.fromBoolean(false));
-    this.set("account", Value.fromBigInt(BigInt.zero()));
+    this.set("userId", Value.fromBigInt(BigInt.zero()));
+    this.set("assetId", Value.fromBigInt(BigInt.zero()));
+    this.set("receiversHash", Value.fromBytes(Bytes.empty()));
     this.set("balance", Value.fromBigInt(BigInt.zero()));
+    this.set("blockTimestamp", Value.fromBigInt(BigInt.zero()));
   }
 
   save(): void {
     let id = this.get("id");
-    assert(id != null, "Cannot save DripsAccount entity without an ID");
+    assert(id != null, "Cannot save DripsSetEvent entity without an ID");
     if (id) {
       assert(
         id.kind == ValueKind.STRING,
-        "Cannot save DripsAccount entity with non-string ID. " +
+        "Cannot save DripsSetEvent entity with non-string ID. " +
           'Considering using .toHex() to convert the "id" to a string.'
       );
-      store.set("DripsAccount", id.toString(), this);
+      store.set("DripsSetEvent", id.toString(), this);
     }
   }
 
-  static load(id: string): DripsAccount | null {
-    return changetype<DripsAccount | null>(store.get("DripsAccount", id));
+  static load(id: string): DripsSetEvent | null {
+    return changetype<DripsSetEvent | null>(store.get("DripsSetEvent", id));
   }
 
   get id(): string {
@@ -512,49 +205,31 @@ export class DripsAccount extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get lastUpdatedBlockTimestamp(): BigInt {
-    let value = this.get("lastUpdatedBlockTimestamp");
+  get userId(): BigInt {
+    let value = this.get("userId");
     return value!.toBigInt();
   }
 
-  set lastUpdatedBlockTimestamp(value: BigInt) {
-    this.set("lastUpdatedBlockTimestamp", Value.fromBigInt(value));
+  set userId(value: BigInt) {
+    this.set("userId", Value.fromBigInt(value));
   }
 
-  get dripsConfig(): string {
-    let value = this.get("dripsConfig");
-    return value!.toString();
-  }
-
-  set dripsConfig(value: string) {
-    this.set("dripsConfig", Value.fromString(value));
-  }
-
-  get dripsEntries(): Array<string> {
-    let value = this.get("dripsEntries");
-    return value!.toStringArray();
-  }
-
-  set dripsEntries(value: Array<string>) {
-    this.set("dripsEntries", Value.fromStringArray(value));
-  }
-
-  get isAccountDrip(): boolean {
-    let value = this.get("isAccountDrip");
-    return value!.toBoolean();
-  }
-
-  set isAccountDrip(value: boolean) {
-    this.set("isAccountDrip", Value.fromBoolean(value));
-  }
-
-  get account(): BigInt {
-    let value = this.get("account");
+  get assetId(): BigInt {
+    let value = this.get("assetId");
     return value!.toBigInt();
   }
 
-  set account(value: BigInt) {
-    this.set("account", Value.fromBigInt(value));
+  set assetId(value: BigInt) {
+    this.set("assetId", Value.fromBigInt(value));
+  }
+
+  get receiversHash(): Bytes {
+    let value = this.get("receiversHash");
+    return value!.toBytes();
+  }
+
+  set receiversHash(value: Bytes) {
+    this.set("receiversHash", Value.fromBytes(value));
   }
 
   get balance(): BigInt {
@@ -564,6 +239,81 @@ export class DripsAccount extends Entity {
 
   set balance(value: BigInt) {
     this.set("balance", Value.fromBigInt(value));
+  }
+
+  get blockTimestamp(): BigInt {
+    let value = this.get("blockTimestamp");
+    return value!.toBigInt();
+  }
+
+  set blockTimestamp(value: BigInt) {
+    this.set("blockTimestamp", Value.fromBigInt(value));
+  }
+}
+
+export class HashToDripsSetDetail extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+
+    this.set("userId", Value.fromBigInt(BigInt.zero()));
+    this.set("assetId", Value.fromBigInt(BigInt.zero()));
+    this.set("currentDripSetEvent", Value.fromString(""));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id != null, "Cannot save HashToDripsSetDetail entity without an ID");
+    if (id) {
+      assert(
+        id.kind == ValueKind.STRING,
+        "Cannot save HashToDripsSetDetail entity with non-string ID. " +
+          'Considering using .toHex() to convert the "id" to a string.'
+      );
+      store.set("HashToDripsSetDetail", id.toString(), this);
+    }
+  }
+
+  static load(id: string): HashToDripsSetDetail | null {
+    return changetype<HashToDripsSetDetail | null>(
+      store.get("HashToDripsSetDetail", id)
+    );
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value!.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get userId(): BigInt {
+    let value = this.get("userId");
+    return value!.toBigInt();
+  }
+
+  set userId(value: BigInt) {
+    this.set("userId", Value.fromBigInt(value));
+  }
+
+  get assetId(): BigInt {
+    let value = this.get("assetId");
+    return value!.toBigInt();
+  }
+
+  set assetId(value: BigInt) {
+    this.set("assetId", Value.fromBigInt(value));
+  }
+
+  get currentDripSetEvent(): string {
+    let value = this.get("currentDripSetEvent");
+    return value!.toString();
+  }
+
+  set currentDripSetEvent(value: string) {
+    this.set("currentDripSetEvent", Value.fromString(value));
   }
 }
 
@@ -572,13 +322,10 @@ export class DripsEntry extends Entity {
     super();
     this.set("id", Value.fromString(id));
 
-    this.set("user", Value.fromBytes(Bytes.empty()));
-    this.set("dripsConfig", Value.fromString(""));
-    this.set("dripsAccount", Value.fromString(""));
-    this.set("isAccountDrip", Value.fromBoolean(false));
-    this.set("account", Value.fromBigInt(BigInt.zero()));
-    this.set("receiver", Value.fromBytes(Bytes.empty()));
-    this.set("amtPerSec", Value.fromBigInt(BigInt.zero()));
+    this.set("sender", Value.fromString(""));
+    this.set("senderAssetConfig", Value.fromString(""));
+    this.set("receiverUserId", Value.fromBigInt(BigInt.zero()));
+    this.set("config", Value.fromBigInt(BigInt.zero()));
   }
 
   save(): void {
@@ -607,204 +354,119 @@ export class DripsEntry extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get user(): Bytes {
-    let value = this.get("user");
-    return value!.toBytes();
-  }
-
-  set user(value: Bytes) {
-    this.set("user", Value.fromBytes(value));
-  }
-
-  get dripsConfig(): string {
-    let value = this.get("dripsConfig");
-    return value!.toString();
-  }
-
-  set dripsConfig(value: string) {
-    this.set("dripsConfig", Value.fromString(value));
-  }
-
-  get dripsAccount(): string {
-    let value = this.get("dripsAccount");
-    return value!.toString();
-  }
-
-  set dripsAccount(value: string) {
-    this.set("dripsAccount", Value.fromString(value));
-  }
-
-  get isAccountDrip(): boolean {
-    let value = this.get("isAccountDrip");
-    return value!.toBoolean();
-  }
-
-  set isAccountDrip(value: boolean) {
-    this.set("isAccountDrip", Value.fromBoolean(value));
-  }
-
-  get account(): BigInt {
-    let value = this.get("account");
-    return value!.toBigInt();
-  }
-
-  set account(value: BigInt) {
-    this.set("account", Value.fromBigInt(value));
-  }
-
-  get receiver(): Bytes {
-    let value = this.get("receiver");
-    return value!.toBytes();
-  }
-
-  set receiver(value: Bytes) {
-    this.set("receiver", Value.fromBytes(value));
-  }
-
-  get amtPerSec(): BigInt {
-    let value = this.get("amtPerSec");
-    return value!.toBigInt();
-  }
-
-  set amtPerSec(value: BigInt) {
-    this.set("amtPerSec", Value.fromBigInt(value));
-  }
-}
-
-export class SplitsConfig extends Entity {
-  constructor(id: string) {
-    super();
-    this.set("id", Value.fromString(id));
-
-    this.set("lastUpdatedBlockTimestamp", Value.fromBigInt(BigInt.zero()));
-    this.set("receiverAddresses", Value.fromStringArray(new Array(0)));
-  }
-
-  save(): void {
-    let id = this.get("id");
-    assert(id != null, "Cannot save SplitsConfig entity without an ID");
-    if (id) {
-      assert(
-        id.kind == ValueKind.STRING,
-        "Cannot save SplitsConfig entity with non-string ID. " +
-          'Considering using .toHex() to convert the "id" to a string.'
-      );
-      store.set("SplitsConfig", id.toString(), this);
-    }
-  }
-
-  static load(id: string): SplitsConfig | null {
-    return changetype<SplitsConfig | null>(store.get("SplitsConfig", id));
-  }
-
-  get id(): string {
-    let value = this.get("id");
-    return value!.toString();
-  }
-
-  set id(value: string) {
-    this.set("id", Value.fromString(value));
-  }
-
-  get lastUpdatedBlockTimestamp(): BigInt {
-    let value = this.get("lastUpdatedBlockTimestamp");
-    return value!.toBigInt();
-  }
-
-  set lastUpdatedBlockTimestamp(value: BigInt) {
-    this.set("lastUpdatedBlockTimestamp", Value.fromBigInt(value));
-  }
-
-  get receiverAddresses(): Array<string> {
-    let value = this.get("receiverAddresses");
-    return value!.toStringArray();
-  }
-
-  set receiverAddresses(value: Array<string>) {
-    this.set("receiverAddresses", Value.fromStringArray(value));
-  }
-
-  get splitsEntries(): Array<string> {
-    let value = this.get("splitsEntries");
-    return value!.toStringArray();
-  }
-
-  set splitsEntries(value: Array<string>) {
-    this.set("splitsEntries", Value.fromStringArray(value));
-  }
-}
-
-export class SplitsEntry extends Entity {
-  constructor(id: string) {
-    super();
-    this.set("id", Value.fromString(id));
-
-    this.set("splitsConfig", Value.fromString(""));
-    this.set("sender", Value.fromBytes(Bytes.empty()));
-    this.set("receiver", Value.fromBytes(Bytes.empty()));
-    this.set("weight", Value.fromBigInt(BigInt.zero()));
-  }
-
-  save(): void {
-    let id = this.get("id");
-    assert(id != null, "Cannot save SplitsEntry entity without an ID");
-    if (id) {
-      assert(
-        id.kind == ValueKind.STRING,
-        "Cannot save SplitsEntry entity with non-string ID. " +
-          'Considering using .toHex() to convert the "id" to a string.'
-      );
-      store.set("SplitsEntry", id.toString(), this);
-    }
-  }
-
-  static load(id: string): SplitsEntry | null {
-    return changetype<SplitsEntry | null>(store.get("SplitsEntry", id));
-  }
-
-  get id(): string {
-    let value = this.get("id");
-    return value!.toString();
-  }
-
-  set id(value: string) {
-    this.set("id", Value.fromString(value));
-  }
-
-  get splitsConfig(): string {
-    let value = this.get("splitsConfig");
-    return value!.toString();
-  }
-
-  set splitsConfig(value: string) {
-    this.set("splitsConfig", Value.fromString(value));
-  }
-
-  get sender(): Bytes {
+  get sender(): string {
     let value = this.get("sender");
-    return value!.toBytes();
+    return value!.toString();
   }
 
-  set sender(value: Bytes) {
-    this.set("sender", Value.fromBytes(value));
+  set sender(value: string) {
+    this.set("sender", Value.fromString(value));
   }
 
-  get receiver(): Bytes {
-    let value = this.get("receiver");
-    return value!.toBytes();
+  get senderAssetConfig(): string {
+    let value = this.get("senderAssetConfig");
+    return value!.toString();
   }
 
-  set receiver(value: Bytes) {
-    this.set("receiver", Value.fromBytes(value));
+  set senderAssetConfig(value: string) {
+    this.set("senderAssetConfig", Value.fromString(value));
   }
 
-  get weight(): BigInt {
-    let value = this.get("weight");
+  get receiverUserId(): BigInt {
+    let value = this.get("receiverUserId");
     return value!.toBigInt();
   }
 
-  set weight(value: BigInt) {
-    this.set("weight", Value.fromBigInt(value));
+  set receiverUserId(value: BigInt) {
+    this.set("receiverUserId", Value.fromBigInt(value));
+  }
+
+  get config(): BigInt {
+    let value = this.get("config");
+    return value!.toBigInt();
+  }
+
+  set config(value: BigInt) {
+    this.set("config", Value.fromBigInt(value));
+  }
+}
+
+export class DripsReceiverSeenEvent extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+
+    this.set("receiversHash", Value.fromBytes(Bytes.empty()));
+    this.set("userId", Value.fromBigInt(BigInt.zero()));
+    this.set("config", Value.fromBigInt(BigInt.zero()));
+    this.set("blockTimestamp", Value.fromBigInt(BigInt.zero()));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(
+      id != null,
+      "Cannot save DripsReceiverSeenEvent entity without an ID"
+    );
+    if (id) {
+      assert(
+        id.kind == ValueKind.STRING,
+        "Cannot save DripsReceiverSeenEvent entity with non-string ID. " +
+          'Considering using .toHex() to convert the "id" to a string.'
+      );
+      store.set("DripsReceiverSeenEvent", id.toString(), this);
+    }
+  }
+
+  static load(id: string): DripsReceiverSeenEvent | null {
+    return changetype<DripsReceiverSeenEvent | null>(
+      store.get("DripsReceiverSeenEvent", id)
+    );
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value!.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get receiversHash(): Bytes {
+    let value = this.get("receiversHash");
+    return value!.toBytes();
+  }
+
+  set receiversHash(value: Bytes) {
+    this.set("receiversHash", Value.fromBytes(value));
+  }
+
+  get userId(): BigInt {
+    let value = this.get("userId");
+    return value!.toBigInt();
+  }
+
+  set userId(value: BigInt) {
+    this.set("userId", Value.fromBigInt(value));
+  }
+
+  get config(): BigInt {
+    let value = this.get("config");
+    return value!.toBigInt();
+  }
+
+  set config(value: BigInt) {
+    this.set("config", Value.fromBigInt(value));
+  }
+
+  get blockTimestamp(): BigInt {
+    let value = this.get("blockTimestamp");
+    return value!.toBigInt();
+  }
+
+  set blockTimestamp(value: BigInt) {
+    this.set("blockTimestamp", Value.fromBigInt(value));
   }
 }
 
