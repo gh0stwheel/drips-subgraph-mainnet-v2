@@ -1,11 +1,11 @@
 import { BigInt, Bytes } from "@graphprotocol/graph-ts"
 import { MultiHash } from "../generated/MetaData/MetaData"
-import { DripsReceiverSeen, DripsSet } from "../generated/DripsHub/DripsHub"
+import { DripsSet, DripsReceiverSeen, SplitsSet, SplitsReceiverSeen} from "../generated/DripsHub/DripsHub"
 import {
   Collected
 } from "../generated/DripsHub/DripsHub"
-import { User, DripsEntry, UserAssetConfig, DripsSetEvent, HashToDripsSetDetail, DripsReceiverSeenEvent,
-  IdentityMetaData} from "../generated/schema"
+import { User, DripsEntry, UserAssetConfig, DripsSetEvent, HashToDripsSetDetail, DripsReceiverSeenEvent, SplitsEntry,
+  SplitsSetEvent, HashToSplitsSetDetail, SplitsReceiverSeenEvent, CollectedEvent, IdentityMetaData} from "../generated/schema"
 import { store,ethereum,log } from '@graphprotocol/graph-ts'
 
 export function handleIdentityMetaData(event: MultiHash): void {
@@ -18,6 +18,31 @@ export function handleIdentityMetaData(event: MultiHash): void {
   identityMetaData.key = event.params.id
   identityMetaData.multiHash = event.params.multiHash
   identityMetaData.save()
+}
+
+export function handleCollected(event: Collected): void {
+  
+  let userId = event.params.userId.toString()
+  let assetId = event.params.assetId.toString()
+  let userAssetConfigId = userId + "-" + assetId
+
+  let userAssetConfig = UserAssetConfig.load(userAssetConfigId)
+
+  if (!userAssetConfig) {
+    userAssetConfig = new UserAssetConfig(userAssetConfigId)
+    userAssetConfig.user = userId
+    userAssetConfig.balance = new BigInt(0)
+    userAssetConfig.dripsEntryIds = []
+  }
+
+  userAssetConfig.amountCollected = userAssetConfig.amountCollected.plus(event.params.collected)
+  userAssetConfig.save()
+
+  let collectedEvent = new CollectedEvent(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+  collectedEvent.user = userId
+  collectedEvent.assetId = event.params.assetId
+  collectedEvent.collected = event.params.collected
+  collectedEvent.blockTimestamp = event.block.timestamp
 }
 
 export function handleDripsSet(event: DripsSet): void {
@@ -35,6 +60,7 @@ export function handleDripsSet(event: DripsSet): void {
   let userAssetConfig = UserAssetConfig.load(userAssetConfigId)
   if (!userAssetConfig) {
     userAssetConfig = new UserAssetConfig(userAssetConfigId)
+    userAssetConfig.user = userId
     userAssetConfig.balance = new BigInt(0)
     userAssetConfig.dripsEntryIds = []
   } else {
@@ -74,7 +100,7 @@ export function handleDripsSet(event: DripsSet): void {
   }
   hashToDripsSetDetail.userId = event.params.userId
   hashToDripsSetDetail.assetId = event.params.assetId
-  hashToDripsSetDetail.currentDripSetEvent = dripsSetEventId
+  hashToDripsSetDetail.currentDripsSetEvent = dripsSetEventId
   hashToDripsSetDetail.save()
 }
 
@@ -114,22 +140,83 @@ export function handleDripsReceiverSeen(event: DripsReceiverSeen): void {
   // TODO -- we need to add some kind of sequence number so we can historically order DripsSetEvents that occur within the same block
 }
 
-/*
-export function handleCollected(event: Collected): void {
+export function handleSplitsSet(event: SplitsSet): void {
+
+  // If the User doesn't exist, create it
   let userId = event.params.userId.toString()
-  let user = DripsUser.load(userId)
-
+  let user = User.load(userId)
   if (!user) {
-    user = new DripsUser(userId)
+    user = new User(userId)
+  } else {
+    // If this is an update, we need to delete the old SplitsEntry values and clear the
+    // splitsEntryIds field
+    if (event.params.receiversHash != user.splitsReceiversHash) {
+      let newDripsEntryIds: string[] = []
+      for (let i = 0; i<user.splitsEntries.length; i++) {
+        let splitsEntryId = user.splitsEntryIds[i]
+        let splitsEntry = SplitsEntry.load(splitsEntryId)
+        if (splitsEntry) {
+          store.remove('SplitsEntry', splitsEntryId)
+        }
+      }
+      user.splitsEntryIds = newDripsEntryIds
+    }
   }
+  user.save()
 
-  if (!fundingProject) {
-    return
+  // Add the HashToSplitsSetDetail
+  let hashToSplitsSetDetail = HashToSplitsSetDetail.load(event.params.receiversHash.toHexString())
+  if (!hashToSplitsSetDetail) {
+    hashToSplitsSetDetail = new HashToSplitsSetDetail(event.params.receiversHash.toHexString())
   }
+  hashToSplitsSetDetail.userId = event.params.userId
+  hashToSplitsSetDetail.save()
 
-  fundingProject.daiCollected = fundingProject.daiCollected.plus(event.params.collected)
-  fundingProject.daiSplit = fundingProject.daiSplit.plus(event.params.split)
+  // Add the SplitsSetEvent
+  let splitsSetEventId = event.transaction.hash.toHex() + "-" + event.logIndex.toString()
+  let splitsSetEvent = new SplitsSetEvent(splitsSetEventId)
+  splitsSetEvent.userId = event.params.userId
+  splitsSetEvent.receiversHash = event.params.receiversHash
+  splitsSetEvent.blockTimestamp = event.block.timestamp
+  splitsSetEvent.save()
 
-  fundingProject.save()
+  // TODO -- we need to add some kind of sequence number so we can historically order DripsSetEvents that occur within the same block
 }
-*/
+
+export function handleSplitsReceiverSeen(event: SplitsReceiverSeen): void {
+
+  // If the User doesn't exist, create it
+  let userId = event.params.userId.toString()
+  let user = User.load(userId)
+  if (!user) {
+    user = new User(userId)
+    user.save()
+  }
+
+  let receiversHash = event.params.receiversHash
+  let hashToSplitsSetDetail = HashToSplitsSetDetail.load(receiversHash.toHexString())
+
+  // We need to use the HashToDripsSetDetail to look up the assetId associated with this receiverHash
+  if (hashToSplitsSetDetail) {
+    // Now we can create the DripsEntry
+    let splitsEntryId = hashToSplitsSetDetail.userId + "-" + event.params.userId
+    let splitsEntry = SplitsEntry.load(splitsEntryId)
+    splitsEntry.sender = hashToSplitsSetDetail.userId.toString()
+    splitsEntry.receiverUserId = event.params.userId
+    splitsEntry.weight = event.params.weight
+    
+    splitsEntry.save()
+  }
+
+  // Create the SplitsReceiverSeenEvent entity
+  let splitsReceiverSeenEventId = event.transaction.hash.toHex() + "-" + event.logIndex.toString()
+  let splitsReceiverSeenEvent = new SplitsReceiverSeenEvent(splitsReceiverSeenEventId)
+  splitsReceiverSeenEvent.receiversHash = event.params.receiversHash
+  splitsReceiverSeenEvent.userId = event.params.userId
+  splitsReceiverSeenEvent.weight = event.params.weight
+  splitsReceiverSeenEvent.blockTimestamp = event.block.timestamp
+
+  splitsReceiverSeenEvent.save()
+
+  // TODO -- we need to add some kind of sequence number so we can historically order DripsSetEvents that occur within the same block
+}
