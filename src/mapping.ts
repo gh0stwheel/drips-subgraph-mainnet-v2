@@ -21,7 +21,7 @@ export function handleIdentityMetaData(event: MultiHash): void {
 }
 
 export function handleCollected(event: Collected): void {
-  
+
   let userId = event.params.userId.toString()
   let assetId = event.params.assetId.toString()
   let userAssetConfigId = userId + "-" + assetId
@@ -56,7 +56,7 @@ export function handleDripsSet(event: DripsSet): void {
   }
 
   // Next create or update the UserAssetConfig and clear any old DripsEntries if needed
-  let userAssetConfigId = event.params.userId.toString() + "-" + event.params.assetId
+  let userAssetConfigId = event.params.userId.toString() + "-" + event.params.assetId.toString()
   let userAssetConfig = UserAssetConfig.load(userAssetConfigId)
   if (!userAssetConfig) {
     userAssetConfig = new UserAssetConfig(userAssetConfigId)
@@ -111,19 +111,21 @@ export function handleDripsReceiverSeen(event: DripsReceiverSeen): void {
 
   // We need to use the HashToDripsSetDetail to look up the assetId associated with this receiverHash
   if (hashToDripsSetDetail) {
-    let userAssetConfigId = hashToDripsSetDetail.userId + "-" + hashToDripsSetDetail.assetId
+    let userAssetConfigId = hashToDripsSetDetail.userId.toString() + "-" + hashToDripsSetDetail.assetId.toString()
     let userAssetConfig = UserAssetConfig.load(userAssetConfigId)
     if (!userAssetConfig) {
       
       // Now we can create the DripsEntry
-      let dripsEntryId = hashToDripsSetDetail.userId + "-" + event.params.userId + "-" + hashToDripsSetDetail.assetId
+      let dripsEntryId = hashToDripsSetDetail.userId.toString() + "-" + event.params.userId.toString() + "-" + hashToDripsSetDetail.assetId.toString()
       let dripsEntry = DripsEntry.load(dripsEntryId)
-      dripsEntry.sender = hashToDripsSetDetail.userId.toString()
-      dripsEntry.senderAssetConfig = userAssetConfigId
-      dripsEntry.receiverUserId = event.params.userId
-      dripsEntry.config = event.params.config
-      
-      dripsEntry.save()
+      if (dripsEntry) {
+        dripsEntry.sender = hashToDripsSetDetail.userId.toString()
+        dripsEntry.senderAssetConfig = userAssetConfigId
+        dripsEntry.receiverUserId = event.params.userId
+        dripsEntry.config = event.params.config
+        
+        dripsEntry.save()
+      }
     }
   }
 
@@ -199,13 +201,15 @@ export function handleSplitsReceiverSeen(event: SplitsReceiverSeen): void {
   // We need to use the HashToDripsSetDetail to look up the assetId associated with this receiverHash
   if (hashToSplitsSetDetail) {
     // Now we can create the DripsEntry
-    let splitsEntryId = hashToSplitsSetDetail.userId + "-" + event.params.userId
+    let splitsEntryId = hashToSplitsSetDetail.userId.toString() + "-" + event.params.userId.toString()
     let splitsEntry = SplitsEntry.load(splitsEntryId)
-    splitsEntry.sender = hashToSplitsSetDetail.userId.toString()
-    splitsEntry.receiverUserId = event.params.userId
-    splitsEntry.weight = event.params.weight
-    
-    splitsEntry.save()
+    if (splitsEntry) {
+      splitsEntry.sender = hashToSplitsSetDetail.userId.toString()
+      splitsEntry.receiverUserId = event.params.userId
+      splitsEntry.weight = event.params.weight
+      
+      splitsEntry.save()
+    }
   }
 
   // Create the SplitsReceiverSeenEvent entity
