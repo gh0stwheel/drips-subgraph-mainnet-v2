@@ -116,16 +116,21 @@ export function handleDripsReceiverSeen(event: DripsReceiverSeen): void {
     if (!userAssetConfig) {
       
       // Now we can create the DripsEntry
+      let newDripsEntryIds = userAssetConfig.dripsEntryIds
       let dripsEntryId = hashToDripsSetDetail.userId.toString() + "-" + event.params.userId.toString() + "-" + hashToDripsSetDetail.assetId.toString()
       let dripsEntry = DripsEntry.load(dripsEntryId)
-      if (dripsEntry) {
-        dripsEntry.sender = hashToDripsSetDetail.userId.toString()
-        dripsEntry.senderAssetConfig = userAssetConfigId
-        dripsEntry.receiverUserId = event.params.userId
-        dripsEntry.config = event.params.config
-        
-        dripsEntry.save()
+      if (!dripsEntry) {
+        dripsEntry = new DripsEntry(dripsEntryId)
       }
+      dripsEntry.sender = hashToDripsSetDetail.userId.toString()
+      dripsEntry.senderAssetConfig = userAssetConfigId
+      dripsEntry.receiverUserId = event.params.userId
+      dripsEntry.config = event.params.config
+      dripsEntry.save()
+
+      newDripsEntryIds.push(dripsEntryId)
+      userAssetConfig.dripsEntryIds = newDripsEntryIds
+      userAssetConfig.save()
     }
   }
 
@@ -198,18 +203,23 @@ export function handleSplitsReceiverSeen(event: SplitsReceiverSeen): void {
   let receiversHash = event.params.receiversHash
   let hashToSplitsSetDetail = HashToSplitsSetDetail.load(receiversHash.toHexString())
 
-  // We need to use the HashToDripsSetDetail to look up the assetId associated with this receiverHash
+  // We need to use the HashToSplitsSetDetail to look up the assetId associated with this receiverHash
   if (hashToSplitsSetDetail) {
-    // Now we can create the DripsEntry
+    // Now we can create the SplitsEntry
+    let newSplitsEntryIds = user.splitsEntryIds
     let splitsEntryId = hashToSplitsSetDetail.userId.toString() + "-" + event.params.userId.toString()
     let splitsEntry = SplitsEntry.load(splitsEntryId)
     if (splitsEntry) {
-      splitsEntry.sender = hashToSplitsSetDetail.userId.toString()
-      splitsEntry.receiverUserId = event.params.userId
-      splitsEntry.weight = event.params.weight
-      
-      splitsEntry.save()
+      splitsEntry = new SplitsEntry(splitsEntryId)
     }
+    splitsEntry.sender = hashToSplitsSetDetail.userId.toString()
+    splitsEntry.receiverUserId = event.params.userId
+    splitsEntry.weight = event.params.weight
+    splitsEntry.save()
+    
+    newSplitsEntryIds.push(splitsEntryId)
+    user.splitsEntryIds = newSplitsEntryIds
+    user.save()
   }
 
   // Create the SplitsReceiverSeenEvent entity
