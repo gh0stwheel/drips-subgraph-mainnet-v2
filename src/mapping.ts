@@ -113,9 +113,10 @@ export function handleDripsReceiverSeen(event: DripsReceiverSeen): void {
   if (hashToDripsSetDetail) {
     let userAssetConfigId = hashToDripsSetDetail.userId.toString() + "-" + hashToDripsSetDetail.assetId.toString()
     let userAssetConfig = UserAssetConfig.load(userAssetConfigId)
-    if (!userAssetConfig) {
+    if (userAssetConfig) {
       
       // Now we can create the DripsEntry
+      if (!userAssetConfig.dripsEntryIds) userAssetConfig.dripsEntryIds = []
       let newDripsEntryIds = userAssetConfig.dripsEntryIds
       let dripsEntryId = hashToDripsSetDetail.userId.toString() + "-" + event.params.userId.toString() + "-" + hashToDripsSetDetail.assetId.toString()
       let dripsEntry = DripsEntry.load(dripsEntryId)
@@ -206,10 +207,11 @@ export function handleSplitsReceiverSeen(event: SplitsReceiverSeen): void {
   // We need to use the HashToSplitsSetDetail to look up the assetId associated with this receiverHash
   if (hashToSplitsSetDetail) {
     // Now we can create the SplitsEntry
+    if (!user.splitsEntryIds) user.splitsEntryIds = []
     let newSplitsEntryIds = user.splitsEntryIds
     let splitsEntryId = hashToSplitsSetDetail.userId.toString() + "-" + event.params.userId.toString()
     let splitsEntry = SplitsEntry.load(splitsEntryId)
-    if (splitsEntry) {
+    if (!splitsEntry) {
       splitsEntry = new SplitsEntry(splitsEntryId)
     }
     splitsEntry.sender = hashToSplitsSetDetail.userId.toString()
