@@ -1,11 +1,11 @@
 import { BigInt, Bytes } from "@graphprotocol/graph-ts"
 import { MultiHash } from "../generated/MetaData/MetaData"
-import { DripsSet, DripsReceiverSeen, SplitsSet, SplitsReceiverSeen} from "../generated/DripsHub/DripsHub"
+import { DripsSet, DripsReceiverSeen, SplitsSet, SplitsReceiverSeen, Given, AppRegistered, AppAddressUpdated} from "../generated/DripsHub/DripsHub"
 import {
   Collected
 } from "../generated/DripsHub/DripsHub"
 import { User, DripsEntry, UserAssetConfig, DripsSetEvent, HashToDripsSetDetail, DripsReceiverSeenEvent, SplitsEntry,
-  SplitsSetEvent, HashToSplitsSetDetail, SplitsReceiverSeenEvent, CollectedEvent, IdentityMetaData} from "../generated/schema"
+  SplitsSetEvent, HashToSplitsSetDetail, SplitsReceiverSeenEvent, CollectedEvent, IdentityMetaData, GivenEvent, App} from "../generated/schema"
 import { store,ethereum,log } from '@graphprotocol/graph-ts'
 
 export function handleIdentityMetaData(event: MultiHash): void {
@@ -43,6 +43,7 @@ export function handleCollected(event: Collected): void {
   collectedEvent.assetId = event.params.assetId
   collectedEvent.collected = event.params.collected
   collectedEvent.blockTimestamp = event.block.timestamp
+  collectedEvent.save()
 }
 
 export function handleDripsSet(event: DripsSet): void {
@@ -235,4 +236,39 @@ export function handleSplitsReceiverSeen(event: SplitsReceiverSeen): void {
   splitsReceiverSeenEvent.save()
 
   // TODO -- we need to add some kind of sequence number so we can historically order DripsSetEvents that occur within the same block
+}
+
+export function handleGiven(event: Given): void {
+
+  let assetId = event.params.assetId.toString()
+
+  let givenEvent = new GivenEvent(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+  givenEvent.userId = event.params.userId
+  givenEvent.receiverUserId = event.params.receiver
+  givenEvent.assetId = event.params.assetId
+  givenEvent.amt = event.params.amt
+  givenEvent.blockTimestamp = event.block.timestamp
+  givenEvent.save()
+}
+
+export function handleAppRegistered(event: AppRegistered): void {
+
+  let appId = event.params.appId.toString()
+  let app = App.load(appId)
+  if (!app) {
+    app = new App(appId)
+  }
+  app.appAddress = event.params.appAddr
+
+  app.save()
+}
+
+export function handleAppAddressUpdated(event: AppAddressUpdated): void {
+
+  let appId = event.params.appId.toString()
+  let app = App.load(appId)
+  if (app) {
+    app.appAddress = event.params.newAppAddr
+    app.save()
+  }
 }

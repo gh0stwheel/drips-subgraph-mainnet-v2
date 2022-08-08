@@ -78,16 +78,6 @@ type SplitsEntry @entity {
   weight: BigInt!
 }
 
-type Give @entity {
-  id: ID! # the transaction hash
-  sender: Bytes!
-  isAccountGive: Boolean! # true if this is a sub-account
-  account: BigInt! # the sub-account (if isAccountDrip == true)
-  receiver: Bytes!
-  amount: BigInt!
-  blockTimestamp: BigInt!
-}
-
 type CollectedEvent @entity {
   id: ID! # event.transaction.hash.toHex() + "-" + event.logIndex.toString()
   user: User!
@@ -100,4 +90,19 @@ type IdentityMetaData @entity {
   id: ID! # the address
   key: Bytes!
   multiHash: Bytes!
+}
+
+type GivenEvent @entity {
+  id: ID! # event.transaction.hash.toHex() + "-" + event.logIndex.toString()
+  userId: BigInt!
+  receiverUserId: BigInt! # the receiver's userId
+  assetId: BigInt!
+  amt: BigInt!
+  blockTimestamp: BigInt!
+}
+
+type App @entity {
+  id: ID! # the appId
+  appAddress: Bytes!
+  lastUpdatedBlockTimestamp: BigInt!
 }
