@@ -17,6 +17,7 @@ export function handleIdentityMetaData(event: MultiHash): void {
   }
   identityMetaData.key = event.params.id
   identityMetaData.multiHash = event.params.multiHash
+  identityMetaData.lastUpdatedBlockTimestamp = event.block.timestamp
   identityMetaData.save()
 }
 
@@ -36,6 +37,7 @@ export function handleCollected(event: Collected): void {
   }
 
   userAssetConfig.amountCollected = userAssetConfig.amountCollected.plus(event.params.collected)
+  userAssetConfig.lastUpdatedBlockTimestamp = event.block.timestamp
   userAssetConfig.save()
 
   let collectedEvent = new CollectedEvent(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
@@ -53,6 +55,7 @@ export function handleDripsSet(event: DripsSet): void {
   let user = User.load(userId)
   if (!user) {
     user = new User(userId)
+    user.lastUpdatedBlockTimestamp = event.block.timestamp
     user.save()
   }
 
@@ -62,6 +65,7 @@ export function handleDripsSet(event: DripsSet): void {
   if (!userAssetConfig) {
     userAssetConfig = new UserAssetConfig(userAssetConfigId)
     userAssetConfig.user = userId
+    userAssetConfig.assetId = event.params.assetId
     userAssetConfig.balance = new BigInt(0)
     userAssetConfig.dripsEntryIds = []
   } else {
@@ -80,6 +84,7 @@ export function handleDripsSet(event: DripsSet): void {
     }
   }
   userAssetConfig.assetConfigHash = event.params.receiversHash
+  userAssetConfig.lastUpdatedBlockTimestamp = event.block.timestamp
   userAssetConfig.save()
 
   // Add the DripsSetEvent
@@ -102,6 +107,7 @@ export function handleDripsSet(event: DripsSet): void {
   hashToDripsSetDetail.userId = event.params.userId
   hashToDripsSetDetail.assetId = event.params.assetId
   hashToDripsSetDetail.currentDripsSetEvent = dripsSetEventId
+  hashToDripsSetDetail.lastUpdatedBlockTimestamp = event.block.timestamp
   hashToDripsSetDetail.save()
 }
 
@@ -132,6 +138,7 @@ export function handleDripsReceiverSeen(event: DripsReceiverSeen): void {
 
       newDripsEntryIds.push(dripsEntryId)
       userAssetConfig.dripsEntryIds = newDripsEntryIds
+      userAssetConfig.lastUpdatedBlockTimestamp = event.block.timestamp
       userAssetConfig.save()
     }
   }
@@ -143,7 +150,6 @@ export function handleDripsReceiverSeen(event: DripsReceiverSeen): void {
   dripsReceiverSeenEvent.userId = event.params.userId
   dripsReceiverSeenEvent.config = event.params.config
   dripsReceiverSeenEvent.blockTimestamp = event.block.timestamp
-
   dripsReceiverSeenEvent.save()
 
   // TODO -- we need to add some kind of sequence number so we can historically order DripsSetEvents that occur within the same block
@@ -171,6 +177,7 @@ export function handleSplitsSet(event: SplitsSet): void {
       user.splitsEntryIds = newDripsEntryIds
     }
   }
+  user.lastUpdatedBlockTimestamp = event.block.timestamp
   user.save()
 
   // Add the HashToSplitsSetDetail
@@ -179,6 +186,7 @@ export function handleSplitsSet(event: SplitsSet): void {
     hashToSplitsSetDetail = new HashToSplitsSetDetail(event.params.receiversHash.toHexString())
   }
   hashToSplitsSetDetail.userId = event.params.userId
+  hashToSplitsSetDetail.lastUpdatedBlockTimestamp = event.block.timestamp
   hashToSplitsSetDetail.save()
 
   // Add the SplitsSetEvent
@@ -199,6 +207,7 @@ export function handleSplitsReceiverSeen(event: SplitsReceiverSeen): void {
   let user = User.load(userId)
   if (!user) {
     user = new User(userId)
+    user.lastUpdatedBlockTimestamp = event.block.timestamp
     user.save()
   }
 
@@ -222,6 +231,7 @@ export function handleSplitsReceiverSeen(event: SplitsReceiverSeen): void {
     
     newSplitsEntryIds.push(splitsEntryId)
     user.splitsEntryIds = newSplitsEntryIds
+    user.lastUpdatedBlockTimestamp = event.block.timestamp
     user.save()
   }
 
@@ -232,7 +242,6 @@ export function handleSplitsReceiverSeen(event: SplitsReceiverSeen): void {
   splitsReceiverSeenEvent.userId = event.params.userId
   splitsReceiverSeenEvent.weight = event.params.weight
   splitsReceiverSeenEvent.blockTimestamp = event.block.timestamp
-
   splitsReceiverSeenEvent.save()
 
   // TODO -- we need to add some kind of sequence number so we can historically order DripsSetEvents that occur within the same block
@@ -259,7 +268,7 @@ export function handleAppRegistered(event: AppRegistered): void {
     app = new App(appId)
   }
   app.appAddress = event.params.appAddr
-
+  app.lastUpdatedBlockTimestamp = event.block.timestamp
   app.save()
 }
 
@@ -269,6 +278,7 @@ export function handleAppAddressUpdated(event: AppAddressUpdated): void {
   let app = App.load(appId)
   if (app) {
     app.appAddress = event.params.newAppAddr
+    app.lastUpdatedBlockTimestamp = event.block.timestamp
     app.save()
   }
 }

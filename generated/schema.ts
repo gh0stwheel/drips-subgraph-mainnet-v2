@@ -298,6 +298,7 @@ export class HashToDripsSetDetail extends Entity {
     this.set("userId", Value.fromBigInt(BigInt.zero()));
     this.set("assetId", Value.fromBigInt(BigInt.zero()));
     this.set("currentDripsSetEvent", Value.fromString(""));
+    this.set("lastUpdatedBlockTimestamp", Value.fromBigInt(BigInt.zero()));
   }
 
   save(): void {
@@ -353,6 +354,15 @@ export class HashToDripsSetDetail extends Entity {
 
   set currentDripsSetEvent(value: string) {
     this.set("currentDripsSetEvent", Value.fromString(value));
+  }
+
+  get lastUpdatedBlockTimestamp(): BigInt {
+    let value = this.get("lastUpdatedBlockTimestamp");
+    return value!.toBigInt();
+  }
+
+  set lastUpdatedBlockTimestamp(value: BigInt) {
+    this.set("lastUpdatedBlockTimestamp", Value.fromBigInt(value));
   }
 }
 
@@ -579,6 +589,7 @@ export class HashToSplitsSetDetail extends Entity {
     this.set("id", Value.fromString(id));
 
     this.set("userId", Value.fromBigInt(BigInt.zero()));
+    this.set("lastUpdatedBlockTimestamp", Value.fromBigInt(BigInt.zero()));
   }
 
   save(): void {
@@ -619,6 +630,15 @@ export class HashToSplitsSetDetail extends Entity {
 
   set userId(value: BigInt) {
     this.set("userId", Value.fromBigInt(value));
+  }
+
+  get lastUpdatedBlockTimestamp(): BigInt {
+    let value = this.get("lastUpdatedBlockTimestamp");
+    return value!.toBigInt();
+  }
+
+  set lastUpdatedBlockTimestamp(value: BigInt) {
+    this.set("lastUpdatedBlockTimestamp", Value.fromBigInt(value));
   }
 }
 
@@ -846,6 +866,7 @@ export class IdentityMetaData extends Entity {
 
     this.set("key", Value.fromBytes(Bytes.empty()));
     this.set("multiHash", Value.fromBytes(Bytes.empty()));
+    this.set("lastUpdatedBlockTimestamp", Value.fromBigInt(BigInt.zero()));
   }
 
   save(): void {
@@ -892,6 +913,15 @@ export class IdentityMetaData extends Entity {
 
   set multiHash(value: Bytes) {
     this.set("multiHash", Value.fromBytes(value));
+  }
+
+  get lastUpdatedBlockTimestamp(): BigInt {
+    let value = this.get("lastUpdatedBlockTimestamp");
+    return value!.toBigInt();
+  }
+
+  set lastUpdatedBlockTimestamp(value: BigInt) {
+    this.set("lastUpdatedBlockTimestamp", Value.fromBigInt(value));
   }
 }
 

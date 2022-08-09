@@ -33,6 +33,7 @@ type HashToDripsSetDetail @entity {
   userId: BigInt! # the sender's userId
   assetId: BigInt!
   currentDripsSetEvent: DripsSetEvent!
+  lastUpdatedBlockTimestamp: BigInt!
 }
 
 type DripsReceiverSeenEvent @entity {
@@ -61,6 +62,7 @@ type SplitsSetEvent @entity {
 type HashToSplitsSetDetail @entity {
   id: ID! # receiversHash
   userId: BigInt! # the sender's userId
+  lastUpdatedBlockTimestamp: BigInt!
 }
 
 type SplitsReceiverSeenEvent @entity {
@@ -90,6 +92,7 @@ type IdentityMetaData @entity {
   id: ID! # the address
   key: Bytes!
   multiHash: Bytes!
+  lastUpdatedBlockTimestamp: BigInt!
 }
 
 type GivenEvent @entity {
